@@ -1,0 +1,504 @@
+{% extends "header.html" %}
+
+{% block title %}Mushaf Reader - 16 Line Indo-Pak{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+<style>
+    html { 
+        direction: rtl; 
+    }
+    
+    body {
+        font-family: 'Scheherazade New', 'Amiri Quran', serif;
+        background: linear-gradient(135deg, #fef7cd 0%, #fef3c7 100%);
+        color: #1f2937;
+        min-height: 100vh;
+    }
+    
+    .mushaf-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    /* Modern Mushaf Header */
+    .mushaf-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 2rem;
+        border-radius: 24px;
+        box-shadow: var(--shadow-xl);
+        margin-bottom: 2rem;
+        position: sticky;
+        top: 90px;
+        z-index: 100;
+        backdrop-filter: blur(20px);
+    }
+    
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .mushaf-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .mushaf-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+    
+    .title-text h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .title-text p {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+    
+    .mushaf-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .page-input {
+        width: 100px;
+        padding: 0.75rem 1rem;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-align: center;
+        font-size: 1rem;
+        font-weight: 600;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+    
+    .page-input:focus {
+        border-color: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .page-input::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .control-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+    
+    .control-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+    
+    /* Info Box */
+    .info-box {
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid rgba(245, 158, 11, 0.3);
+        border-radius: 24px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .info-box h3 {
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .info-box p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        line-height: 1.7;
+        margin: 0;
+    }
+    
+    /* Modern Mushaf Page */
+    .mushaf-page {
+        background: rgba(255, 255, 255, 0.95);
+        border: 3px solid rgba(245, 158, 11, 0.4);
+        border-radius: 24px;
+        padding: 3rem 2.5rem;
+        box-shadow: var(--shadow-xl);
+        min-height: 800px;
+        position: relative;
+        backdrop-filter: blur(20px);
+        margin-bottom: 2rem;
+    }
+    
+    .page-number {
+        position: absolute;
+        top: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .bismillah {
+        text-align: center;
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 3rem 0 2rem 0;
+        font-weight: 700;
+        font-family: 'Amiri Quran', serif;
+    }
+    
+    .surah-header {
+        text-align: center;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .ayah-line {
+        font-size: 2rem;
+        line-height: 4rem;
+        text-align: justify;
+        margin-bottom: 0.75rem;
+        color: #1f2937;
+        direction: rtl;
+        font-family: 'Amiri Quran', serif;
+        font-weight: 400;
+    }
+    
+    .ayah-number {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 36px;
+        font-size: 1rem;
+        margin: 0 0.5rem;
+        font-weight: 700;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    /* Modern Navigation */
+    .navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 24px;
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(10px);
+    }
+    
+    .nav-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 16px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .nav-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .nav-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .page-info {
+        text-align: center;
+        font-size: 1.2rem;
+        color: var(--primary-color);
+        font-weight: 700;
+        background: rgba(30, 64, 175, 0.1);
+        padding: 1rem 2rem;
+        border-radius: 16px;
+        border: 2px solid rgba(30, 64, 175, 0.2);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .mushaf-container {
+            padding: 1rem;
+        }
+        
+        .header-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 1.5rem;
+        }
+        
+        .mushaf-controls {
+            justify-content: center;
+        }
+        
+        .mushaf-page {
+            padding: 2rem 1.5rem;
+            min-height: 600px;
+        }
+        
+        .ayah-line {
+            font-size: 1.6rem;
+            line-height: 3.2rem;
+        }
+        
+        .navigation {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .nav-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .page-number {
+            font-size: 1rem;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .bismillah {
+            font-size: 2rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .mushaf-controls {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .control-btn, .page-input {
+            width: 100%;
+        }
+        
+        .ayah-line {
+            font-size: 1.4rem;
+            line-height: 2.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mushaf-container">
+    <!-- Modern Mushaf Header -->
+    <div class="mushaf-header">
+        <div class="header-content">
+            <div class="mushaf-title">
+                <div class="mushaf-icon">
+                    <i class="fas fa-book-quran"></i>
+                </div>
+                <div class="title-text">
+                    <h2>مصحف التجويد - 16 سطر</h2>
+                    <p>Indo-Pak Style Mushaf Reader</p>
+                </div>
+            </div>
+            <div class="mushaf-controls">
+                <input type="number" class="page-input" id="pageInput" placeholder="صفحة" min="1" max="604" value="1">
+                <button class="control-btn" onclick="goToPage()">
+                    <i class="fas fa-arrow-left"></i>
+                    اذهب
+                </button>
+                <a href="/collections" class="control-btn">
+                    <i class="fas fa-arrow-right"></i>
+                    رجوع
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+        <h3>مصحف التجويد - 16 سطر</h3>
+        <p>
+            هذا المصحف يحتوي على 604 صفحة بنظام 16 سطر في كل صفحة (النمط الهندي-الباكستاني)
+            <br>
+            <strong>ملاحظة:</strong> هذا عرض تجريبي. للحصول على المصحف الكامل، يرجى استخدام نسخة PDF الأصلية.
+        </p>
+    </div>
+
+    <!-- Mushaf Page -->
+    <div class="mushaf-page">
+        <div class="page-number">صفحة <span id="currentPage">1</span></div>
+        
+        <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+        
+        <div class="surah-header">سُورَةُ الْفَاتِحَةِ</div>
+        
+        <div id="pageContent">
+            <div class="ayah-line">
+                الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ <span class="ayah-number">٢</span>
+            </div>
+            <div class="ayah-line">
+                الرَّحْمَٰنِ الرَّحِيمِ <span class="ayah-number">٣</span>
+            </div>
+            <div class="ayah-line">
+                مَالِكِ يَوْمِ الدِّينِ <span class="ayah-number">٤</span>
+            </div>
+            <div class="ayah-line">
+                إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ <span class="ayah-number">٥</span>
+            </div>
+            <div class="ayah-line">
+                اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ <span class="ayah-number">٦</span>
+            </div>
+            <div class="ayah-line">
+                صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ <span class="ayah-number">٧</span>
+            </div>
+            
+            <div style="margin-top: 3rem; text-align: center;">
+                <div class="surah-header" style="margin-top: 2rem;">سُورَةُ الْبَقَرَةِ</div>
+                <div class="ayah-line" style="margin-top: 1rem;">
+                    الم <span class="ayah-number">١</span>
+                </div>
+                <div class="ayah-line">
+                    ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِّلْمُتَّقِينَ <span class="ayah-number">٢</span>
+                </div>
+                <div class="ayah-line">
+                    الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنفِقُونَ <span class="ayah-number">٣</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modern Navigation -->
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousPage()" id="prevBtn">
+            <i class="fas fa-chevron-right"></i>
+            الصفحة السابقة
+        </button>
+        
+        <div class="page-info">
+            صفحة <span id="pageDisplay">1</span> من 604
+        </div>
+        
+        <button class="nav-btn" onclick="nextPage()" id="nextBtn">
+            الصفحة التالية
+            <i class="fas fa-chevron-left"></i>
+        </button>
+    </div>
+</div>
+
+<script>
+    let currentPage = 1;
+    const totalPages = 604;
+    
+    function updatePage() {
+        document.getElementById('currentPage').textContent = currentPage;
+        document.getElementById('pageDisplay').textContent = currentPage;
+        document.getElementById('pageInput').value = currentPage;
+        
+        // Update button states
+        document.getElementById('prevBtn').disabled = currentPage === 1;
+        document.getElementById('nextBtn').disabled = currentPage === totalPages;
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    function nextPage() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            updatePage();
+        }
+    }
+    
+    function previousPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            updatePage();
+        }
+    }
+    
+    function goToPage() {
+        const input = document.getElementById('pageInput');
+        const page = parseInt(input.value);
+        
+        if (page >= 1 && page <= totalPages) {
+            currentPage = page;
+            updatePage();
+        } else {
+            alert('الرجاء إدخال رقم صفحة صحيح (1-604)');
+            input.value = currentPage;
+        }
+    }
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight') {
+            previousPage();
+        } else if (e.key === 'ArrowLeft') {
+            nextPage();
+        }
+    });
+    
+    // Initialize
+    updatePage();
+</script>
+{% endblock %}

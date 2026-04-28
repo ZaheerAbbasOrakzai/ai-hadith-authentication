@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Chat Assistant - Get Islamic knowledge and guidance">
+    <meta name="keywords" content="islamic chat, ai assistant, quran, hadith, islamic knowledge">
+    <title>AI Chat Assistant - AI Hadith Authenticator</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    
+    <!-- Theme -->
+    <script>
+        document.documentElement.className = 'loading';
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
+    <style>
+        body { padding-top: 80px; }
+        .main-content { min-height: calc(100vh - 80px); }
+        .chat-container { 
+            background: var(--glass-bg, rgba(255,255,255,0.1)); 
+            backdrop-filter: blur(10px); 
+            border-radius: 16px; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0;
+        }
+        .chat-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        .chat-messages { 
+            background: rgba(0,0,0,0.2); 
+            padding: 1.5rem; 
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .chat-message { 
+            margin-bottom: 1rem; 
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        .chat-message.user {
+            flex-direction: row-reverse;
+        }
+        .chat-avatar { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            background: linear-gradient(135deg, #10b981, #059669); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.2rem; 
+            color: white;
+            flex-shrink: 0;
+        }
+        .chat-message.user .chat-avatar {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        .chat-bubble { 
+            background: rgba(255,255,255,0.1); 
+            padding: 1rem; 
+            border-radius: 12px; 
+            max-width: 80%; 
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .chat-message.user .chat-bubble {
+            background: rgba(59, 130, 246, 0.2);
+        }
+        .chat-input-container { 
+            padding: 1.5rem; 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+        }
+        .chat-input-form {
+            display: flex;
+            gap: 1rem;
+        }
+        .chat-input {
+            flex: 1;
+            padding: 1rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.1);
+            color: #e2e8f0;
+            font-size: 1rem;
+        }
+        .chat-input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        .chat-send-btn {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        .chat-send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+        .quick-actions { 
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .quick-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        .quick-btn:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: #94a3b8;
+            font-style: italic;
+        }
+        .typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Include Universal Header -->
+    {% include 'header.html' %}
+                <a href="{{ url_for('chat_page') }}" class="nav-link active">AI Chat</a>
+                <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content container">
+        <section class="p-lg">
+            <div class="card glass">
+                <div class="card-header">
+                    <h1 class="card-title">💬 AI Chat Assistant</h1>
+                    <p class="text-gray">Get Islamic knowledge and guidance from our AI assistant</p>
+                </div>
+                
+                <!-- Chat Container -->
+                <div class="chat-container">
+                    <!-- Messages Container -->
+                    <div id="chatMessages" class="chat-messages p-lg mb-lg" style="height: 400px; overflow-y: auto;">
+                        <!-- Welcome Message -->
+                        <div class="chat-message chat-message-assistant fade-in">
+                            <div class="flex gap-sm">
+                                <div class="chat-avatar">🤖</div>
+                                <div class="chat-bubble bg-gray-600">
+                                    <p class="text-white">
+                                        Assalamu Alaikum! 👋<br><br>
+                                        I'm your Islamic knowledge assistant. I can help you with:<br>
+                                        • 📖 Quran verses and explanations<br>
+                                        • 📚 Hadith and their authenticity<br>
+                                        • 🕌 Islamic practices and teachings<br>
+                                        • 🤔 Questions about Islam<br>
+                                        • 📚 Islamic history and figures<br><br>
+                                        How can I assist you today?
+                                    </p>
+                                    <span class="chat-time">${new Date().toLocaleTimeString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="chat-input-container">
+                        <form id="chatForm" class="flex gap-sm">
+                            <input 
+                                type="text" 
+                                id="chatInput" 
+                                class="form-input flex-1" 
+                                placeholder="Ask about Islam, Quran, hadith, or any Islamic topic..."
+                                autocomplete="off"
+                            >
+                            <button 
+                                type="submit" 
+                                id="chatSendBtn" 
+                                class="btn btn-primary"
+                            >
+                                📤 Send
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions mt-lg">
+                    <h3 class="text-primary mb-md">⚡ Quick Questions</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-sm">
+                        <button class="btn btn-secondary text-left" onclick="askQuickQuestion('What are the Five Pillars of Islam?')">
+                            🏛️ Five Pillars of Islam
+                        </button>
+                        <button class="btn btn-secondary text-left" onclick="askQuickQuestion('Tell me about the importance of prayer in Islam')">
+                            🙏 Importance of Prayer
+                        </button>
+                        <button class="btn btn-secondary text-left" onclick="askQuickQuestion('What does the Quran say about charity?')">
+                            💝 Charity in Islam
+                        </button>
+                        <button class="btn btn-secondary text-left" onclick="askQuickQuestion('Explain the concept of Halal and Haram')">
+                            ⚖️ Halal and Haram
+                        </button>
+                        <button class="btn btn-secondary text-left" onclick="askQuickQuestion('Who was Prophet Muhammad (PBUH)?')">
+                            👤 Prophet Muhammad
+                        </button>
+                        <button class="btn btn-secondary text-left" onclick="askQuickQuestion('What is Ramadan and why is it important?')">
+                            🌙 Ramadan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="p-lg">
+            <div class="card glass">
+                <div class="card-header">
+                    <h2 class="card-title">✨ Chat Features</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+                    <div>
+                        <h3 class="text-primary mb-md">🤖 AI-Powered Responses</h3>
+                        <p class="text-gray">Get accurate, context-aware answers based on authentic Islamic sources including Quran, hadith, and scholarly interpretations.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-primary mb-md">📚 Comprehensive Knowledge</h3>
+                        <p class="text-gray">Access information about Quran, hadith, Islamic law, history, and practices from reliable sources.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-primary mb-md">🌍 Multilingual Support</h3>
+                        <p class="text-gray">Chat in multiple languages including English, Arabic, Urdu, and more with accurate translations.</p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-primary mb-md">🔒 Privacy & Respect</h3>
+                        <p class="text-gray">Your conversations are private and handled with respect for Islamic values and sensitivities.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Guidelines Section -->
+        <section class="p-lg">
+            <div class="card glass">
+                <div class="card-header">
+                    <h2 class="card-title">📋 Chat Guidelines</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+                    <div>
+                        <h3 class="text-primary mb-md">✅ What You Can Ask</h3>
+                        <ul class="text-gray space-y-sm">
+                            <li>• Questions about Quran verses and meanings</li>
+                            <li>• Hadith explanations and authenticity</li>
+                            <li>• Islamic practices and rituals</li>
+                            <li>• Islamic history and figures</li>
+                            <li>• Fiqh (Islamic jurisprudence) questions</li>
+                            <li>• General Islamic knowledge</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-primary mb-md">⚠️ Important Notes</h3>
+                        <ul class="text-gray space-y-sm">
+                            <li>• AI responses are for educational purposes</li>
+                            <li>• For specific religious rulings, consult qualified scholars</li>
+                            <li>• Always verify important information with authentic sources</li>
+                            <li>• Respect Islamic etiquette in conversations</li>
+                            <li>• Use knowledge to benefit yourself and others</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat History -->
+        <section class="p-lg">
+            <div class="card glass">
+                <div class="card-header">
+                    <h2 class="card-title">📜 Chat History</h2>
+                    <button class="btn btn-secondary btn-sm" onclick="clearChatHistory()">
+                        🗑️ Clear History
+                    </button>
+                </div>
+                <div id="chatHistory" class="space-y-md">
+                    <!-- Chat history will be displayed here -->
+                    <div class="text-center p-lg">
+                        <div class="text-4xl text-gray mb-md">📜</div>
+                        <p class="text-gray">Your chat history will appear here</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass mt-lg">
+        <div class="container text-center">
+            <p class="text-gray">
+                © 2025 AI Hadith Authenticator. Islamic knowledge powered by AI technology.
+            </p>
+            <div class="flex gap-lg justify-center mt-md">
+                <a href="#" class="nav-link">Privacy</a>
+                <a href="#" class="nav-link">Terms</a>
+                <a href="#" class="nav-link">About</a>
+                <a href="#" class="nav-link">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    
+    <!-- Chat JavaScript -->
+    <script>
+        let chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+        let isTyping = false;
+
+        // Enhanced chat functions
+        async function sendChatMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('chatSendBtn');
+            const message = chatInput.value.trim();
+            
+            if (!message || isTyping) return;
+            
+            isTyping = true;
+            showLoading(sendBtn, true);
+            
+            // Add user message
+            displayChatMessage(message, 'user');
+            chatInput.value = '';
+            
+            try {
+                const result = await apiRequest('/chat/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                
+                if (result.success) {
+                    displayChatMessage(result.response, 'assistant');
+                    saveChatMessage(message, result.response);
+                } else {
+                    displayChatMessage('Sorry, I encountered an error. Please try again.', 'assistant');
+                }
+            } catch (error) {
+                displayChatMessage('Connection error. Please check your internet connection.', 'assistant');
+            } finally {
+                isTyping = false;
+                showLoading(sendBtn, false);
+            }
+        }
+
+        // Display chat message with enhanced styling
+        function displayChatMessage(message, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageEl = document.createElement('div');
+            messageEl.className = `chat-message chat-message-${sender} fade-in`;
+            
+            const isUser = sender === 'user';
+            const avatar = isUser ? '👤' : '🤖';
+            const bgColor = isUser ? 'bg-primary' : 'bg-gray-600';
+            
+            messageEl.innerHTML = `
+                <div class="flex gap-sm">
+                    <div class="chat-avatar">${avatar}</div>
+                    <div class="chat-bubble ${bgColor}">
+                        <p class="text-white">${escapeHtml(message)}</p>
+                        <span class="chat-time">${new Date().toLocaleTimeString()}</span>
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageEl);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Save chat message
+        function saveChatMessage(userMessage, aiResponse) {
+            const chatEntry = {
+                userMessage,
+                aiResponse,
+                timestamp: new Date().toISOString()
+            };
+            
+            chatHistory.push(chatEntry);
+            
+            // Keep only last 50 conversations
+            if (chatHistory.length > 50) {
+                chatHistory = chatHistory.slice(-50);
+            }
+            
+            localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            displayChatHistory();
+        }
+
+        // Display chat history
+        function displayChatHistory() {
+            const container = document.getElementById('chatHistory');
+            
+            if (chatHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center p-lg">
+                        <div class="text-4xl text-gray mb-md">📜</div>
+                        <p class="text-gray">Your chat history will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const historyHtml = chatHistory.slice(-10).reverse().map(entry => `
+                <div class="border-bottom border-gray-600 p-md">
+                    <div class="mb-sm">
+                        <span class="text-primary font-semibold">You:</span>
+                        <p class="text-gray text-sm">${escapeHtml(entry.userMessage.substring(0, 100))}${entry.userMessage.length > 100 ? '...' : ''}</p>
+                    </div>
+                    <div>
+                        <span class="text-secondary font-semibold">AI:</span>
+                        <p class="text-gray text-sm">${escapeHtml(entry.aiResponse.substring(0, 100))}${entry.aiResponse.length > 100 ? '...' : ''}</p>
+                    </div>
+                    <div class="text-xs text-gray mt-sm">${formatDate(entry.timestamp)}</div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = historyHtml;
+        }
+
+        // Quick question function
+        function askQuickQuestion(question) {
+            document.getElementById('chatInput').value = question;
+            document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Clear chat history
+        function clearChatHistory() {
+            if (confirm('Are you sure you want to clear all chat history?')) {
+                chatHistory = [];
+                localStorage.removeItem('chatHistory');
+                displayChatHistory();
+                showAlert('Chat history cleared', 'success');
+            }
+        }
+
+        // Enhanced event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            document.documentElement.classList.remove('loading');
+            
+            const chatForm = document.getElementById('chatForm');
+            const chatInput = document.getElementById('chatInput');
+            
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                sendChatMessage();
+            });
+            
+            // Enhanced input handling
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendChatMessage();
+                }
+            });
+            
+            // Auto-focus on input
+            chatInput.focus();
+            
+            // Display existing chat history
+            displayChatHistory();
+            
+            // Load previous session messages if any
+            const savedMessages = sessionStorage.getItem('currentChatSession');
+            if (savedMessages) {
+                const messages = JSON.parse(savedMessages);
+                messages.forEach(msg => {
+                    displayChatMessage(msg.text, msg.sender);
+                });
+            }
+        });
+
+        // Save current session to sessionStorage
+        window.addEventListener('beforeunload', function() {
+            const messages = Array.from(document.querySelectorAll('.chat-message')).map(msg => ({
+                text: msg.querySelector('.text-white').textContent,
+                sender: msg.classList.contains('chat-message-user') ? 'user' : 'assistant'
+            }));
+            sessionStorage.setItem('currentChatSession', JSON.stringify(messages));
+        });
+    </script>
+</body>
+</html>

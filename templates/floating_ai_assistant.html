@@ -1,0 +1,633 @@
+<!-- Floating AI Assistant Component -->
+<style>
+    /* Floating AI Assistant Styles */
+    .ai-assistant-float {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 1rem;
+    }
+
+    .ai-chat-toggle {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #1e40af, #059669);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 1.8rem;
+        cursor: pointer;
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ai-chat-toggle::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.6s ease;
+    }
+
+    .ai-chat-toggle:hover::before {
+        transform: translateX(100%);
+    }
+
+    .ai-chat-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 25px 50px -12px rgba(30, 64, 175, 0.4);
+    }
+
+    .ai-chat-toggle.active {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .ai-notification {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 20px;
+        height: 20px;
+        background: #f59e0b;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: white;
+        animation: aiPulse 2s infinite;
+    }
+
+    @keyframes aiPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    .ai-chat-widget {
+        width: 400px;
+        height: 600px;
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        border: 1px solid #e5e7eb;
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        animation: aiSlideUp 0.3s ease;
+    }
+
+    @keyframes aiSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .ai-chat-header {
+        background: linear-gradient(135deg, #1e40af, #059669);
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .ai-avatar {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .ai-info h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .ai-info p {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .ai-chat-messages {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        position: relative;
+    }
+
+    .ai-message {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        animation: aiFadeInUp 0.3s ease;
+    }
+
+    @keyframes aiFadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .ai-message.user {
+        flex-direction: row-reverse;
+    }
+
+    .ai-message-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .ai-message.bot .ai-message-avatar {
+        background: linear-gradient(135deg, #1e40af, #059669);
+        color: white;
+    }
+
+    .ai-message.user .ai-message-avatar {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        color: white;
+    }
+
+    .ai-message-content {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 1rem 1.25rem;
+        border-radius: 20px;
+        max-width: 85%;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(30, 64, 175, 0.1);
+        color: #1f2937;
+        font-weight: 500;
+    }
+
+    .ai-message.user .ai-message-content {
+        background: linear-gradient(135deg, #1e40af, #1e3a8a);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        font-weight: 500;
+    }
+
+    .ai-message.bot .ai-message-content {
+        background: rgba(255, 255, 255, 0.98);
+        border: 2px solid rgba(30, 64, 175, 0.15);
+        color: #111827;
+        font-weight: 500;
+    }
+
+    /* Enhanced text visibility */
+    .ai-message-content strong {
+        font-weight: 700;
+        color: inherit;
+    }
+
+    .ai-message-content em {
+        font-style: italic;
+        color: inherit;
+    }
+
+    .ai-message.bot .ai-message-content strong {
+        color: #1e40af;
+    }
+
+    .ai-message.user .ai-message-content strong {
+        color: #fbbf24;
+    }
+        border: none;
+    }
+
+    .ai-chat-input {
+        padding: 1.25rem;
+        border-top: 2px solid rgba(30, 64, 175, 0.15);
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+    }
+
+    .ai-input-group {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .ai-input-field {
+        flex: 1;
+        border: 2px solid rgba(30, 64, 175, 0.2);
+        border-radius: 25px;
+        padding: 0.9rem 1.2rem;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.95);
+        color: #1f2937;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+    }
+
+    .ai-input-field::placeholder {
+        color: #6b7280;
+        font-weight: 400;
+    }
+
+    .ai-input-field:focus {
+        border-color: #1e40af;
+        box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.15);
+        background: rgba(255, 255, 255, 1);
+    }
+
+    .ai-send-btn {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #1e40af, #059669);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    }
+
+    .ai-send-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(30, 64, 175, 0.4);
+    }
+
+    .ai-send-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .ai-typing {
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 1.25rem;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 2px solid rgba(30, 64, 175, 0.15);
+    }
+
+    .ai-typing-dots {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .ai-typing-dot {
+        width: 8px;
+        height: 8px;
+        background: #1e40af;
+        border-radius: 50%;
+        animation: aiTyping 1.4s infinite ease-in-out;
+    }
+
+    .ai-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .ai-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes aiTyping {
+        0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+        40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Quick Actions */
+    .ai-quick-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+    }
+
+    .ai-quick-btn {
+        background: rgba(30, 64, 175, 0.15);
+        border: 2px solid rgba(30, 64, 175, 0.25);
+        border-radius: 20px;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+        color: #1e40af;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        backdrop-filter: blur(5px);
+    }
+
+    .ai-quick-btn:hover {
+        background: linear-gradient(135deg, #1e40af, #059669);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .ai-chat-widget {
+            width: calc(100vw - 40px);
+            height: calc(100vh - 120px);
+            max-width: 400px;
+        }
+
+        .ai-assistant-float {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .ai-chat-toggle {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+        }
+    }
+
+    /* Custom Scrollbar */
+    .ai-chat-messages::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .ai-chat-messages::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+    }
+
+    .ai-chat-messages::-webkit-scrollbar-thumb {
+        background: #1e40af;
+        border-radius: 3px;
+    }
+
+    .ai-chat-messages::-webkit-scrollbar-thumb:hover {
+        background: #1e3a8a;
+    }
+</style>
+
+<!-- Floating AI Assistant HTML -->
+<div class="ai-assistant-float">
+    <div class="ai-chat-widget" id="aiChatWidget">
+        <div class="ai-chat-header">
+            <div class="ai-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="ai-info">
+                <h4>Islamic AI Assistant</h4>
+                <p>Ask me anything about Islam</p>
+            </div>
+        </div>
+        
+        <div class="ai-chat-messages" id="aiChatMessages">
+            <div class="ai-message bot">
+                <div class="ai-message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="ai-message-content">
+                    <strong>السلام عليكم ورحمة الله وبركاته</strong><br>
+                    <strong>Assalamu alaykum wa rahmatullahi wa barakatuh!</strong> 🌟<br><br>
+                    
+                    Welcome! I'm your comprehensive Islamic knowledge assistant. I can help you with detailed guidance on:
+                    
+                    <br><br>🕌 <strong>Worship:</strong> Prayer, Fasting, Hajj, Dhikr<br>
+                    📖 <strong>Quran:</strong> Verses, meanings, Tafsir<br>
+                    📚 <strong>Hadith:</strong> Prophetic guidance & collections<br>
+                    ⚖️ <strong>Fiqh:</strong> Islamic law & contemporary issues<br>
+                    💭 <strong>Personal:</strong> Spiritual & life guidance<br><br>
+                    
+                    Ask me anything about Islam - from basic questions to complex topics. I'm here to provide authentic, detailed responses! 😊
+                </div>
+            </div>
+            
+            <div class="ai-quick-actions">
+                <button class="ai-quick-btn" onclick="sendQuickMessage('What are the five pillars of Islam?')">Five Pillars</button>
+                <button class="ai-quick-btn" onclick="sendQuickMessage('Tell me about prayer times and procedures')">Prayer Guide</button>
+                <button class="ai-quick-btn" onclick="sendQuickMessage('Explain Zakat calculation and rules')">Zakat</button>
+                <button class="ai-quick-btn" onclick="sendQuickMessage('Ramadan fasting guidelines')">Ramadan</button>
+                <button class="ai-quick-btn" onclick="sendQuickMessage('Daily Islamic duas and dhikr')">Daily Duas</button>
+                <button class="ai-quick-btn" onclick="sendQuickMessage('Halal and Haram in daily life')">Halal/Haram</button>
+            </div>
+            
+            <div class="ai-typing" id="aiTyping">
+                <div class="ai-message-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="ai-typing-dots">
+                    <div class="ai-typing-dot"></div>
+                    <div class="ai-typing-dot"></div>
+                    <div class="ai-typing-dot"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ai-chat-input">
+            <div class="ai-input-group">
+                <input type="text" class="ai-input-field" id="aiInputField" placeholder="Ask about Islam..." onkeypress="handleAiKeyPress(event)">
+                <button class="ai-send-btn" id="aiSendBtn" onclick="sendAiMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <button class="ai-chat-toggle" id="aiChatToggle" onclick="toggleAiChat()">
+        <i class="fas fa-comments" id="aiToggleIcon"></i>
+        <div class="ai-notification" id="aiNotification">1</div>
+    </button>
+</div>
+
+<!-- AI Assistant JavaScript -->
+<script>
+    let aiChatOpen = false;
+    let aiMessageCount = 0;
+
+    function toggleAiChat() {
+        const widget = document.getElementById('aiChatWidget');
+        const toggle = document.getElementById('aiChatToggle');
+        const icon = document.getElementById('aiToggleIcon');
+        const notification = document.getElementById('aiNotification');
+        
+        aiChatOpen = !aiChatOpen;
+        
+        if (aiChatOpen) {
+            widget.style.display = 'flex';
+            toggle.classList.add('active');
+            icon.className = 'fas fa-times';
+            notification.style.display = 'none';
+            
+            // Focus input
+            setTimeout(() => {
+                document.getElementById('aiInputField').focus();
+            }, 300);
+        } else {
+            widget.style.display = 'none';
+            toggle.classList.remove('active');
+            icon.className = 'fas fa-comments';
+        }
+    }
+
+    function handleAiKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendAiMessage();
+        }
+    }
+
+    function sendQuickMessage(message) {
+        document.getElementById('aiInputField').value = message;
+        sendAiMessage();
+    }
+
+    async function sendAiMessage() {
+        const input = document.getElementById('aiInputField');
+        const message = input.value.trim();
+        
+        if (!message) return;
+        
+        // Add user message
+        addAiMessage(message, 'user');
+        input.value = '';
+        
+        // Show typing indicator
+        showAiTyping();
+        
+        try {
+            const response = await fetch('/chat/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            });
+            
+            const data = await response.json();
+            
+            hideAiTyping();
+            
+            if (data.success) {
+                addAiMessage(data.response, 'bot');
+            } else {
+                const errMsg = data.error || 'Something went wrong. Please try again.';
+                addAiMessage(errMsg, 'error');
+            }
+        } catch (error) {
+            hideAiTyping();
+            addAiMessage('Connection error. Please check your internet and try again.', 'error');
+        }
+    }
+
+    function addAiMessage(content, sender) {
+        const messagesContainer = document.getElementById('aiChatMessages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `ai-message ${sender === 'error' ? 'bot' : sender}`;
+
+        const avatar = sender === 'user'
+            ? '<i class="fas fa-user"></i>'
+            : '<i class="fas fa-robot"></i>';
+
+        const bubbleStyle = sender === 'error'
+            ? 'background:#fff3cd;border:2px solid #ffc107;color:#856404;border-radius:16px;padding:0.9rem 1.1rem;font-size:0.9rem;line-height:1.5;max-width:90%;'
+            : '';
+
+        messageDiv.innerHTML = `
+            <div class="ai-message-avatar">${avatar}</div>
+            <div class="ai-message-content" ${bubbleStyle ? `style="${bubbleStyle}"` : ''}>${formatAiMessage(content)}</div>
+        `;
+
+        const typing = document.getElementById('aiTyping');
+        messagesContainer.insertBefore(messageDiv, typing);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        if (!aiChatOpen && sender === 'bot') {
+            aiMessageCount++;
+            const notification = document.getElementById('aiNotification');
+            notification.textContent = aiMessageCount;
+            notification.style.display = 'flex';
+        }
+    }
+
+    function formatAiMessage(content) {
+        // Escape HTML first
+        let text = content
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
+        // Bold: **text**
+        text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Italic: *text*
+        text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        // Inline code: `text`
+        text = text.replace(/`([^`]+)`/g, '<code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:0.85em;">$1</code>');
+        // Numbered list: lines starting with "1. "
+        text = text.replace(/^(\d+)\.\s+(.+)$/gm, '<div style="margin:4px 0;padding-left:8px;">$1. $2</div>');
+        // Bullet list: lines starting with "- " or "• "
+        text = text.replace(/^[-•]\s+(.+)$/gm, '<div style="margin:4px 0;padding-left:8px;">• $1</div>');
+        // Double newline → paragraph break
+        text = text.replace(/\n\n/g, '<br><br>');
+        // Single newline → line break
+        text = text.replace(/\n/g, '<br>');
+
+        return text;
+    }
+
+    function showAiTyping() {
+        document.getElementById('aiTyping').style.display = 'flex';
+        document.getElementById('aiSendBtn').disabled = true;
+        
+        const messagesContainer = document.getElementById('aiChatMessages');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function hideAiTyping() {
+        document.getElementById('aiTyping').style.display = 'none';
+        document.getElementById('aiSendBtn').disabled = false;
+    }
+
+    // Initialize notification
+    document.addEventListener('DOMContentLoaded', function() {
+        const notification = document.getElementById('aiNotification');
+        notification.style.display = 'flex';
+    });
+</script>

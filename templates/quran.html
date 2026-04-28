@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quran Reader - AI Hadith Authenticator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .surah-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .surah-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .arabic-text {
+            font-family: 'Traditional Arabic', 'Amiri Quran', serif;
+            text-align: right;
+            line-height: 2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="glass-effect sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-book-quran text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">AI Hadith Authenticator</h1>
+                        <p class="text-sm text-gray-600">Quran Reader</p>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="hidden md:flex items-center space-x-6">
+                    <a href="/" class="text-gray-700 hover:text-green-600 font-medium transition-colors">Home</a>
+                    <a href="/hadith-analyzer" class="text-gray-700 hover:text-green-600 font-medium transition-colors">AI Analyzer</a>
+                    <a href="/quran" class="text-gray-700 hover:text-green-600 font-medium transition-colors">Quran</a>
+                </nav>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    <button class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-user text-gray-600"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <!-- Title Section -->
+            <section class="text-center mb-8 fade-in">
+                <div class="glass-effect rounded-2xl p-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">
+                        Holy Quran Reader
+                    </h2>
+                    <p class="text-lg text-gray-700 mb-6">
+                        Read and explore the complete Quran with advanced features
+                    </p>
+                    <div class="flex justify-center space-x-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-book-open text-green-500 mr-2"></i>
+                            <span class="text-sm text-gray-600">114 Surahs</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-language text-blue-500 mr-2"></i>
+                            <span class="text-sm text-gray-600">Multiple Translations</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-headphones text-purple-500 mr-2"></i>
+                            <span class="text-sm text-gray-600">Audio Recitation</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Surah Selection -->
+            <section class="mb-8">
+                <div class="glass-effect rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Select Surah</h3>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <!-- Surah Al-Fatiha -->
+                        <div class="surah-card bg-white rounded-lg p-4" onclick="openSurah(1)">
+                            <div class="flex items-center mb-3">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-green-600 font-bold">1</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Al-Fatiha</h4>
+                                    <p class="text-sm text-gray-600">The Opening</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">7 verses</p>
+                        </div>
+
+                        <!-- Surah Al-Baqarah -->
+                        <div class="surah-card bg-white rounded-lg p-4" onclick="openSurah(2)">
+                            <div class="flex items-center mb-3">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-blue-600 font-bold">2</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Al-Baqarah</h4>
+                                    <p class="text-sm text-gray-600">The Cow</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">286 verses</p>
+                        </div>
+
+                        <!-- Surah Aal-E-Imran -->
+                        <div class="surah-card bg-white rounded-lg p-4" onclick="openSurah(3)">
+                            <div class="flex items-center mb-3">
+                                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-purple-600 font-bold">3</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Aal-E-Imran</h4>
+                                    <p class="text-sm text-gray-600">The Family of Imran</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">200 verses</p>
+                        </div>
+
+                        <!-- Surah An-Nisa -->
+                        <div class="surah-card bg-white rounded-lg p-4" onclick="openSurah(4)">
+                            <div class="flex items-center mb-3">
+                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-red-600 font-bold">4</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">An-Nisa</h4>
+                                    <p class="text-sm text-gray-600">The Women</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">176 verses</p>
+                        </div>
+
+                        <!-- Surah Al-Ma'idah -->
+                        <div class="surah-card bg-white rounded-lg p-4" onclick="openSurah(5)">
+                            <div class="flex items-center mb-3">
+                                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-yellow-600 font-bold">5</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Al-Ma'idah</h4>
+                                    <p class="text-sm text-gray-600">The Table Spread</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">120 verses</p>
+                        </div>
+
+                        <!-- Surah Al-An'am -->
+                        <div class="surah-card bg-white rounded-lg p-4" onclick="openSurah(6)">
+                            <div class="flex items-center mb-3">
+                                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-indigo-600 font-bold">6</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Al-An'am</h4>
+                                    <p class="text-sm text-gray-600">The Cattle</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">165 verses</p>
+                        </div>
+
+                        <!-- Surah Al-A'raf -->
+                        <div class="surah-card bg-white rounded-lg p-4" onclick="openSurah(7)">
+                            <div class="flex items-center mb-3">
+                                <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-pink-600 font-bold">7</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Al-A'raf</h4>
+                                    <p class="text-sm text-gray-600">The Heights</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">206 verses</p>
+                        </div>
+
+                        <!-- More Surahs -->
+                        <div class="surah-card bg-white rounded-lg p-4" onclick="showMoreSurahs()">
+                            <div class="text-center">
+                                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-ellipsis-h text-gray-600"></i>
+                                </div>
+                                <h4 class="font-bold text-gray-900">More Surahs</h4>
+                                <p class="text-sm text-gray-600">View all 114 surahs</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quran Reader Interface -->
+            <section id="quranReader" class="hidden mb-8">
+                <div class="glass-effect rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 id="surahTitle" class="text-2xl font-bold text-gray-900">Surah Title</h3>
+                        <div class="flex space-x-4">
+                            <button onclick="toggleTranslation()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-language mr-2"></i>Translation
+                            </button>
+                            <button onclick="toggleArabic()" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                                <i class="fas fa-font mr-2"></i>Arabic
+                            </button>
+                            <button onclick="playAudio()" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors">
+                                <i class="fas fa-play mr-2"></i>Audio
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Verses Display -->
+                    <div id="versesContainer" class="space-y-4 max-h-96 overflow-y-auto">
+                        <!-- Verses will be loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section class="mb-8">
+                <div class="glass-effect rounded-xl p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">🌟 Advanced Features</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-book text-white"></i>
+                            </div>
+                            <h4 class="font-bold text-gray-900 mb-2">Complete Quran</h4>
+                            <p class="text-sm text-gray-600">All 114 surahs with 6,236 verses</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-globe text-white"></i>
+                            </div>
+                            <h4 class="font-bold text-gray-900 mb-2">Multiple Languages</h4>
+                            <p class="text-sm text-gray-600">Arabic, English, Urdu, and more</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-headphones text-white"></i>
+                            </div>
+                            <h4 class="font-bold text-gray-900 mb-2">Audio Recitation</h4>
+                            <p class="text-sm text-gray-600">Professional recitation audio</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-effect mt-12">
+        <div class="container mx-auto px-4 py-8">
+            <div class="text-center">
+                <p class="text-gray-600">© 2025 AI Hadith Authenticator. Complete Islamic Knowledge Platform</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        let currentSurah = null;
+        let showTranslation = false;
+        let showArabic = true;
+
+        const surahs = {
+            1: { name: 'Al-Fatiha', englishName: 'The Opening', verses: 7 },
+            2: { name: 'Al-Baqarah', englishName: 'The Cow', verses: 286 },
+            3: { name: 'Aal-E-Imran', englishName: 'The Family of Imran', verses: 200 },
+            4: { name: 'An-Nisa', englishName: 'The Women', verses: 176 },
+            5: { name: 'Al-Ma\'idah', englishName: 'The Table Spread', verses: 120 },
+            6: { name: 'Al-An\'am', englishName: 'The Cattle', verses: 165 },
+            7: { name: 'Al-A\'raf', englishName: 'The Heights', verses: 206 }
+        };
+
+        function openSurah(surahNumber) {
+            currentSurah = surahs[surahNumber];
+            if (!currentSurah) return;
+
+            const readerSection = document.getElementById('quranReader');
+            const surahTitle = document.getElementById('surahTitle');
+            
+            readerSection.classList.remove('hidden');
+            surahTitle.textContent = `${currentSurah.name} - ${currentSurah.englishName}`;
+            
+            loadVerses(surahNumber);
+        }
+
+        function loadVerses(surahNumber) {
+            const versesContainer = document.getElementById('versesContainer');
+            versesContainer.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-3xl text-green-600"></i><p class="mt-4 text-gray-600">Loading verses...</p></div>';
+
+            // Simulate loading verses (in real app, this would load from API/database)
+            setTimeout(() => {
+                const sampleVerses = [
+                    { number: 1, arabic: 'Bismillah', english: 'In the name of Allah...' },
+                    { number: 2, arabic: 'Alhamdulillah', english: 'Praise be to Allah...' }
+                ];
+
+                let html = '';
+                sampleVerses.forEach(verse => {
+                    const showArabicText = showArabic ? `<p class="arabic-text text-lg text-gray-800 mb-3" dir="rtl">${verse.arabic}</p>` : '';
+                    const showTranslationText = showTranslation ? `<p class="text-gray-700">${verse.english}</p>` : '';
+                    const copyArabicButton = showArabic ? `<button onclick="copyArabic('${verse.arabic}')" class="text-green-600 hover:text-green-700 text-sm">
+                        <i class="fas fa-copy mr-1"></i>Copy Arabic
+                    </button>` : '';
+                    const copyEnglishButton = showTranslation ? `<button onclick="copyEnglish('${verse.english}')" class="text-blue-600 hover:text-blue-700 text-sm">
+                        <i class="fas fa-copy mr-1"></i>Copy English
+                    </button>` : '';
+
+                    html += `
+                        <div class="bg-white rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-sm font-bold text-gray-500">Verse ${verse.number}</span>
+                                <div class="flex space-x-2">
+                                    ${copyArabicButton}
+                                    ${copyEnglishButton}
+                                </div>
+                            </div>
+                            ${showArabicText}
+                            ${showTranslationText}
+                        </div>
+                    `;
+                });
+
+                versesContainer.innerHTML = html;
+            }, 1000);
+        }
+
+        function toggleTranslation() {
+            showTranslation = !showTranslation;
+            loadVerses(Object.keys(surahs).find(key => surahs[key].name === currentSurah?.name));
+        }
+
+        function toggleArabic() {
+            showArabic = !showArabic;
+            loadVerses(Object.keys(surahs).find(key => surahs[key].name === currentSurah?.name));
+        }
+
+        function playAudio() {
+            // Audio playback functionality
+            alert('Audio recitation feature coming soon!');
+        }
+
+        function copyArabic(text) {
+            navigator.clipboard.writeText(text);
+            showToast('Arabic text copied to clipboard!');
+        }
+
+        function copyEnglish(text) {
+            navigator.clipboard.writeText(text);
+            showToast('English translation copied to clipboard!');
+        }
+
+        function showToast(message) {
+            // Simple toast notification
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 fade-in';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 3000);
+        }
+
+        function showMoreSurahs() {
+            alert('Complete surah list coming soon! Currently showing first 7 surahs.');
+        }
+
+        // Add fade-in animation
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('section').forEach(section => {
+                section.classList.add('fade-in');
+            });
+        });
+    </script>
+    
+    <!-- Floating AI Assistant -->
+    {% include 'floating_ai_assistant.html' %}
+</body>
+</html>

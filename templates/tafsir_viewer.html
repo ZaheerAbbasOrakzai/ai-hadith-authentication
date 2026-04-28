@@ -1,0 +1,430 @@
+{% extends "header.html" %}
+
+{% block title %}Tafsir Ibn Kathir - AI Hadith Authenticator{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        min-height: 100vh;
+    }
+    
+    .tafsir-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    /* Back Button */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--primary-color);
+        text-decoration: none;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        padding: 0.75rem 1.5rem;
+        background: rgba(30, 64, 175, 0.1);
+        border-radius: 16px;
+        border: 2px solid rgba(30, 64, 175, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .back-btn:hover {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        text-decoration: none;
+        transform: translateX(-4px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    /* Modern Header */
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 3rem 0;
+        background: linear-gradient(135deg, rgba(30, 64, 175, 0.1), rgba(5, 150, 105, 0.1));
+        border-radius: 24px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .bismillah {
+        font-family: 'Amiri', serif;
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+    
+    .page-title {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
+    
+    .page-subtitle {
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+    
+    /* Info Box */
+    .info-box {
+        background: rgba(16, 185, 129, 0.1);
+        border: 2px solid rgba(16, 185, 129, 0.3);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        color: var(--text-secondary);
+        backdrop-filter: blur(10px);
+    }
+    
+    .info-box i {
+        font-size: 1.2rem;
+        color: var(--secondary-color);
+        margin-right: 0.5rem;
+    }
+    
+    /* Modern Search Box */
+    .search-box {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border: 2px solid rgba(30, 64, 175, 0.2);
+        border-radius: 24px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 1.25rem 1.5rem;
+        background: rgba(30, 64, 175, 0.05);
+        border: 2px solid rgba(30, 64, 175, 0.2);
+        border-radius: 16px;
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+    
+    .search-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+        background: rgba(30, 64, 175, 0.08);
+    }
+    
+    .search-input::placeholder {
+        color: var(--text-secondary);
+    }
+    
+    .search-btn {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border: none;
+        padding: 1.25rem 2.5rem;
+        border-radius: 16px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: var(--shadow-md);
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .search-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    /* Results Grid */
+    .results {
+        display: grid;
+        gap: 2rem;
+    }
+    
+    .result-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border: 2px solid rgba(30, 64, 175, 0.1);
+        border-radius: 24px;
+        padding: 2rem;
+        transition: all 0.4s ease;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .result-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        border-radius: 24px 24px 0 0;
+    }
+    
+    .result-card:hover {
+        border-color: rgba(30, 64, 175, 0.3);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(30, 64, 175, 0.1);
+    }
+    
+    .ayah-ref {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(30, 64, 175, 0.1);
+        padding: 0.75rem 1.25rem;
+        border-radius: 16px;
+    }
+    
+    .ayah-ref i {
+        font-size: 1.1rem;
+    }
+    
+    .result-text {
+        font-family: 'Amiri', serif;
+        font-size: 1.2rem;
+        line-height: 2;
+        color: var(--text-primary);
+        direction: rtl;
+        text-align: right;
+        background: rgba(30, 64, 175, 0.03);
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid rgba(30, 64, 175, 0.1);
+    }
+    
+    /* Loading State */
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+    }
+    
+    .loading i {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    /* Error State */
+    .error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 2px solid rgba(239, 68, 68, 0.3);
+        border-radius: 20px;
+        padding: 2rem;
+        color: #dc2626;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .error i {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .tafsir-container {
+            padding: 1rem;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .bismillah {
+            font-size: 1.8rem;
+        }
+        
+        .search-box {
+            padding: 1.5rem;
+        }
+        
+        .result-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .ayah-ref {
+            font-size: 1rem;
+        }
+        
+        .result-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .search-btn {
+            padding: 1rem 2rem;
+            font-size: 1rem;
+        }
+        
+        .result-card {
+            padding: 1.5rem;
+        }
+        
+        .result-text {
+            font-size: 1rem;
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tafsir-container">
+    <a href="/collections" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Back to Collections
+    </a>
+    
+    <!-- Modern Header -->
+    <div class="page-header">
+        <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+        <h1 class="page-title">Tafsir Ibn Kathir</h1>
+        <p class="page-subtitle">تفسير ابن كثير - Classical Quranic Exegesis</p>
+    </div>
+    
+    <!-- Info Box -->
+    <div class="info-box">
+        <i class="fas fa-info-circle"></i>
+        Search by keywords, surah name, or ayah reference. Local database contains 6,236+ authentic entries from the classical tafsir of Imam Ibn Kathir.
+    </div>
+    
+    <!-- Modern Search Box -->
+    <div class="search-box">
+        <input type="text" 
+               class="search-input" 
+               id="searchInput" 
+               placeholder="Search Tafsir... (e.g., 'bismillah', 'Al-Fatiha', 'mercy', 'guidance')"
+               onkeypress="if(event.key==='Enter') searchTafsir()">
+        <button class="search-btn" onclick="searchTafsir()" id="searchBtn">
+            <i class="fas fa-search"></i> Search Tafsir Ibn Kathir
+        </button>
+    </div>
+    
+    <!-- Results Container -->
+    <div id="results" class="results"></div>
+</div>
+
+<script>
+    async function searchTafsir() {
+        const query = document.getElementById('searchInput').value.trim();
+        const resultsDiv = document.getElementById('results');
+        const searchBtn = document.getElementById('searchBtn');
+        
+        if (!query) {
+            resultsDiv.innerHTML = '<div class="error"><i class="fas fa-exclamation-triangle"></i>Please enter a search term to find relevant tafsir entries</div>';
+            return;
+        }
+        
+        // Show loading state
+        resultsDiv.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><br>Searching through Tafsir Ibn Kathir...</div>';
+        searchBtn.disabled = true;
+        
+        try {
+            const response = await fetch(`/api/tafsir/search?q=${encodeURIComponent(query)}&limit=20`);
+            const data = await response.json();
+            
+            searchBtn.disabled = false;
+            
+            if (data.success && data.data.length > 0) {
+                resultsDiv.innerHTML = data.data.map(item => `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="ayah-ref">
+                                <i class="fas fa-book-quran"></i>
+                                Surah ${item.surah} : Ayah ${item.ayah}
+                            </div>
+                        </div>
+                        <div class="result-text">${item.text || 'No text available'}</div>
+                    </div>
+                `).join('');
+            } else {
+                resultsDiv.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-search-minus"></i>
+                        No results found for "${query}". Try different keywords or check spelling.
+                        <br><br>
+                        <strong>Search Tips:</strong>
+                        <br>• Try Arabic terms like "الله", "رحمة", "هداية"
+                        <br>• Use English keywords like "mercy", "guidance", "prayer"
+                        <br>• Search by Surah names like "Al-Fatiha", "Al-Baqarah"
+                    </div>
+                `;
+            }
+        } catch (error) {
+            searchBtn.disabled = false;
+            resultsDiv.innerHTML = `
+                <div class="error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Search failed due to a connection error. Please check your internet connection and try again.
+                </div>
+            `;
+            console.error('Search error:', error);
+        }
+    }
+    
+    // Load initial results with bismillah
+    window.addEventListener('load', () => {
+        document.getElementById('searchInput').value = 'bismillah';
+        searchTafsir();
+    });
+    
+    // Focus on search input
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('searchInput').focus();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" data-default-theme-mode="{{ theme_preferences.mode }}" data-default-theme-accent="{{ theme_preferences.accent }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - AI Hadith Authenticator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-start: #eef2ff;
+            --bg-mid: #f8fafc;
+            --bg-end: #ecfeff;
+            --panel-bg: rgba(255, 255, 255, 0.88);
+            --panel-border: rgba(148, 163, 184, 0.22);
+            --page-text: #0f172a;
+            --page-muted: #475569;
+            --accent-start: #10b981;
+            --accent-end: #059669;
+            --accent-soft: rgba(16, 185, 129, 0.14);
+        }
+
+        html[data-theme-accent="indigo"] {
+            --accent-start: #6366f1;
+            --accent-end: #8b5cf6;
+            --accent-soft: rgba(99, 102, 241, 0.16);
+        }
+
+        html[data-theme-accent="rose"] {
+            --accent-start: #f43f5e;
+            --accent-end: #ec4899;
+            --accent-soft: rgba(244, 63, 94, 0.16);
+        }
+
+        html[data-theme-accent="amber"] {
+            --accent-start: #f59e0b;
+            --accent-end: #ea580c;
+            --accent-soft: rgba(245, 158, 11, 0.18);
+        }
+
+        html[data-theme-mode="dark"] {
+            --bg-start: #020617;
+            --bg-mid: #0f172a;
+            --bg-end: #111827;
+            --panel-bg: rgba(15, 23, 42, 0.82);
+            --panel-border: rgba(148, 163, 184, 0.18);
+            --page-text: #f8fafc;
+            --page-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+            color: var(--page-text);
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .glass-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+        }
+
+        .theme-text {
+            color: var(--page-text);
+        }
+
+        .theme-muted {
+            color: var(--page-muted);
+        }
+
+        .theme-gradient {
+            background-image: linear-gradient(135deg, var(--accent-start), var(--accent-end));
+        }
+
+        .theme-soft {
+            background: var(--accent-soft);
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 1.5rem;
+        }
+
+        .stat-card:hover,
+        .action-card:hover,
+        .collection-tag:hover {
+            transform: translateY(-4px);
+        }
+
+        .stat-card,
+        .action-card,
+        .collection-tag {
+            transition: all 0.25s ease;
+        }
+
+        html[data-theme-mode="dark"] .bg-white {
+            background-color: rgba(15, 23, 42, 0.74) !important;
+        }
+
+        html[data-theme-mode="dark"] .text-slate-900,
+        html[data-theme-mode="dark"] .text-gray-900 {
+            color: #f8fafc !important;
+        }
+
+        html[data-theme-mode="dark"] .text-slate-600,
+        html[data-theme-mode="dark"] .text-gray-600,
+        html[data-theme-mode="dark"] .text-gray-500 {
+            color: #94a3b8 !important;
+        }
+
+        html[data-theme-mode="dark"] .border-slate-200,
+        html[data-theme-mode="dark"] .border-gray-200 {
+            border-color: rgba(148, 163, 184, 0.18) !important;
+        }
+
+        @media (max-width: 1024px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        <header class="glass-panel rounded-3xl px-6 py-5 mb-8">
+            <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl theme-gradient flex items-center justify-center text-white shadow-lg">
+                        <i class="fas fa-user-circle text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm uppercase tracking-[0.25em] theme-muted">Account Center</p>
+                        <h1 class="text-3xl font-bold theme-text">Profile & Identity</h1>
+                        <p class="theme-muted">A polished overview of your account, collections, and workflow shortcuts.</p>
+                    </div>
+                </div>
+                <nav class="flex flex-wrap gap-3 text-sm">
+                    <a href="/" class="px-4 py-2 rounded-full bg-white/70 border border-slate-200 text-slate-700 hover:text-slate-900">Home</a>
+                    <a href="/hadith-analyzer" class="px-4 py-2 rounded-full bg-white/70 border border-slate-200 text-slate-700 hover:text-slate-900">Analyzer</a>
+                    <a href="/quran" class="px-4 py-2 rounded-full bg-white/70 border border-slate-200 text-slate-700 hover:text-slate-900">Quran</a>
+                    <a href="/settings" class="px-4 py-2 rounded-full theme-gradient text-white shadow-lg">Settings</a>
+                    <a href="/logout" class="px-4 py-2 rounded-full bg-slate-900 text-white">Logout</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="profile-grid">
+            <section class="space-y-6">
+                <div class="glass-panel rounded-3xl p-8">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                        <div class="flex items-center gap-5">
+                            <div class="w-24 h-24 rounded-3xl theme-gradient text-white flex items-center justify-center text-3xl font-bold shadow-xl">
+                                {{ profile_data.initials }}
+                            </div>
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.3em] theme-muted">Signed In</p>
+                                <h2 class="text-3xl font-bold theme-text">{{ profile_data.name }}</h2>
+                                <p class="text-lg theme-muted">{{ profile_data.email }}</p>
+                                <div class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full theme-soft text-sm font-medium theme-text">
+                                    <i class="fas fa-calendar-check"></i>
+                                    Joined {{ profile_data.joined_on }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 min-w-[240px]">
+                            {% for stat in profile_stats %}
+                            <div class="stat-card rounded-2xl bg-white border border-slate-200 px-4 py-4">
+                                <p class="text-xs uppercase tracking-[0.22em] text-slate-500">{{ stat.label }}</p>
+                                <p class="text-xl font-bold text-slate-900 mt-2">{{ stat.value }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-3xl p-8">
+                    <div class="flex items-center justify-between mb-5">
+                        <div>
+                            <p class="text-sm uppercase tracking-[0.22em] theme-muted">Professional Workspace</p>
+                            <h3 class="text-2xl font-bold theme-text">Quick Actions</h3>
+                        </div>
+                        <a href="/settings" class="text-sm font-semibold theme-text">Customize experience</a>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <a href="/hadith-analyzer" class="action-card rounded-2xl bg-white border border-slate-200 p-5">
+                            <div class="w-12 h-12 rounded-2xl theme-gradient text-white flex items-center justify-center mb-4">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold text-slate-900">Open Analyzer</h4>
+                            <p class="text-sm text-slate-600 mt-2">Review hadith text, image, and audio input with conservative results.</p>
+                        </a>
+                        <a href="/quran" class="action-card rounded-2xl bg-white border border-slate-200 p-5">
+                            <div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4">
+                                <i class="fas fa-book-open-reader"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold text-slate-900">Read Quran</h4>
+                            <p class="text-sm text-slate-600 mt-2">Move between Quran reading and hadith analysis from one dashboard.</p>
+                        </a>
+                        <a href="/settings" class="action-card rounded-2xl bg-white border border-slate-200 p-5">
+                            <div class="w-12 h-12 rounded-2xl bg-violet-100 text-violet-700 flex items-center justify-center mb-4">
+                                <i class="fas fa-sliders"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold text-slate-900">Adjust Theme</h4>
+                            <p class="text-sm text-slate-600 mt-2">Switch between appearance modes and accent palettes instantly.</p>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="space-y-6">
+                <div class="glass-panel rounded-3xl p-8">
+                    <p class="text-sm uppercase tracking-[0.22em] theme-muted">Collection Access</p>
+                    <h3 class="text-2xl font-bold theme-text mt-2">Supported Books Only</h3>
+                    <p class="theme-muted mt-2">Your search and collection views are restricted to explicitly supported books for a cleaner and more reliable interface.</p>
+                    <div class="flex flex-wrap gap-3 mt-6">
+                        {% for collection in hadith_collections %}
+                        <span class="collection-tag inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 text-sm text-slate-700">
+                            <i class="fas fa-book theme-text"></i>
+                            {{ collection.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-3xl p-8">
+                    <p class="text-sm uppercase tracking-[0.22em] theme-muted">Current Appearance</p>
+                    <h3 class="text-2xl font-bold theme-text mt-2">Theme Snapshot</h3>
+                    <div class="mt-5 rounded-3xl p-5 theme-gradient text-white shadow-xl">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs uppercase tracking-[0.22em] text-white/70">Mode</p>
+                                <p class="text-2xl font-semibold">{{ profile_data.theme_mode.title() }}</p>
+                            </div>
+                            <i class="fas fa-palette text-3xl text-white/80"></i>
+                        </div>
+                        <div class="mt-5 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs uppercase tracking-[0.22em] text-white/70">Accent</p>
+                                <p class="text-lg font-semibold">{{ profile_data.theme_accent.title() }}</p>
+                            </div>
+                            <a href="/settings" class="px-4 py-2 rounded-full bg-white/15 border border-white/20 text-sm font-semibold">Change Theme</a>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+    <script src="/static/js/theme.js"></script>
+    
+    <!-- Floating AI Assistant -->
+    {% include 'floating_ai_assistant.html' %}
+</body>
+</html>

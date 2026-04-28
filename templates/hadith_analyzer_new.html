@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hadith Analyzer - AI Hadith Authenticator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        document.documentElement.className = 'loading';
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
+    <style>
+        /* Force Font Awesome icons to display and hide any text content */
+        .fas, .fab, .far { font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands' !important; }
+        .fas { font-weight: 900 !important; }
+        .far { font-weight: 400 !important; }
+        /* Hide any text that might appear as icon names */
+        i[class*="fa-"] { font-style: normal !important; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            color: var(--neutral-800);
+        }
+        .main-content { padding-top: 80px; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* Header */
+        .page-header {
+            text-align: center;
+            padding: 40px 0;
+            color: white;
+        }
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 1.5rem;
+            color: white;
+        }
+        .stat-icon.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-icon.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stat-icon.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-icon.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-card h3 {
+            font-size: 2rem;
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .stat-card p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Input Section */
+        .input-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .panel-header i {
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+        .panel-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        /* Input Tabs */
+        .input-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        .tab-btn:hover { border-color: #667eea; }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        textarea, input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        .char-count {
+            text-align: right;
+            font-size: 0.85rem;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        @media (max-width: 768px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+        .option-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .option-box:hover { border-color: #667eea; }
+        .option-box input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+        }
+        .option-box h4 {
+            margin: 0 0 5px 0;
+            font-size: 0.95rem;
+            color: #333;
+        }
+        .option-box p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        /* Buttons */
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+        .btn-secondary:hover { background: #e0e0e0; }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Loading */
+        .loading-state {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        .loading-state.active { display: block; }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f0f0f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results */
+        .results-panel {
+            display: none;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .results-panel.active { display: block; }
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .results-header h2 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .result-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-icon {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .btn-icon:hover {
+            background: #f5f5f5;
+            border-color: #667eea;
+        }
+
+        /* Grade Badge */
+        .grade-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .grade-sahih { background: #d4edda; color: #155724; }
+        .grade-hasan { background: #d1ecf1; color: #0c5460; }
+        .grade-daif { background: #fff3cd; color: #856404; }
+        .grade-mawdu { background: #f8d7da; color: #721c24; }
+        .grade-unknown { background: #e2e3e5; color: #383d41; }
+
+        /* Analysis Sections */
+        .analysis-content {
+            display: grid;
+            gap: 20px;
+        }
+        .analysis-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+        .analysis-box h4 {
+            margin: 0 0 10px 0;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .analysis-box p {
+            margin: 0;
+            line-height: 1.7;
+            color: #555;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        .empty-state h3 {
+            margin: 0 0 10px 0;
+            color: #666;
+        }
+
+        /* Recent Analyses */
+        .recent-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+        .recent-list {
+            display: grid;
+            gap: 15px;
+        }
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+        .recent-item:hover {
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+        .recent-grade {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        .recent-info { flex: 1; }
+        .recent-info h4 {
+            margin: 0 0 4px 0;
+            font-size: 1rem;
+        }
+        .recent-info p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        .recent-time {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        /* Navbar styling for this page */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .navbar-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #333;
+            text-decoration: none;
+        }
+        .navbar-brand i {
+            color: #667eea;
+            font-size: 1.5rem;
+        }
+        .navbar-nav {
+            display: flex;
+            gap: 8px;
+        }
+        .nav-link {
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #666;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        .nav-link:hover {
+            background: #f0f0f0;
+            color: #667eea;
+        }
+        .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] .stat-card,
+        [data-theme="dark"] .input-panel,
+        [data-theme="dark"] .results-panel,
+        [data-theme="dark"] .recent-panel {
+            background: #2a2a3a;
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] .navbar {
+            background: rgba(42,42,58,0.95);
+        }
+        [data-theme="dark"] .navbar-brand { color: #e0e0e0; }
+        [data-theme="dark"] .nav-link { color: #aaa; }
+        [data-theme="dark"] .nav-link:hover { background: #3a3a4a; color: #fff; }
+        [data-theme="dark"] input,
+        [data-theme="dark"] textarea {
+            background: #3a3a4a;
+            border-color: #4a4a5a;
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] .option-box,
+        [data-theme="dark"] .recent-item,
+        [data-theme="dark"] .analysis-box {
+            background: #3a3a4a;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('index') }}" class="navbar-brand">
+                <i class="fas fa-mosque"></i>
+                <span>AI Hadith Authenticator</span>
+            </a>
+            <div class="navbar-nav">
+                <a href="{{ url_for('index') }}" class="nav-link">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="{{ url_for('hadith_analyzer') }}" class="nav-link active">
+                    <i class="fas fa-search"></i> Analyzer
+                </a>
+                <a href="{{ url_for('quran') }}" class="nav-link">
+                    <i class="fas fa-book-quran"></i> Quran
+                </a>
+                <a href="{{ url_for('chat_page') }}" class="nav-link">
+                    <i class="fas fa-comments"></i> AI Chat
+                </a>
+                <a href="{{ url_for('logout') }}" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div class="container">
+            <!-- Header -->
+            <div class="page-header">
+                <h1>
+                    <i class="fas fa-brain"></i>
+                    AI Hadith Analyzer
+                    <span class="badge">Beta</span>
+                </h1>
+                <p>Experience the power of advanced AI in authenticating Islamic hadith. Our sophisticated neural networks analyze text patterns, historical context, and chain of custody.</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>95%</h3>
+                    <p>Accuracy Rate</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>&lt; 5s</h3>
+                    <p>Analysis Time</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>AI</h3>
+                    <p>Powered</p>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3>50K+</h3>
+                    <p>Reference Data</p>
+                </div>
+            </div>
+
+            <!-- Input Panel -->
+            <div class="input-panel">
+                <div class="panel-header">
+                    <i class="fas fa-edit"></i>
+                    <h3>Input Hadith</h3>
+                </div>
+
+                <div class="input-tabs">
+                    <button class="tab-btn active" onclick="switchTab('text')">
+                        <i class="fas fa-keyboard"></i> Text Input
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('file')">
+                        <i class="fas fa-upload"></i> File Upload
+                    </button>
+                </div>
+
+                <form id="analyzerForm" action="/analyze-full" method="POST" enctype="multipart/form-data">
+                    <div id="textInput" class="tab-content">
+                        <div class="form-group">
+                            <label for="hadithText">
+                                <i class="fas fa-quote-left"></i> Hadith Text (Optional if uploading file)
+                            </label>
+                            <textarea name="text" id="hadithText" placeholder="Enter the hadith text in Arabic, English, or both..."></textarea>
+                            <div class="char-count">0 / 10000 characters</div>
+                        </div>
+                    </div>
+
+                    <!-- File Upload Buttons -->
+                    <div class="form-group">
+                        <label><i class="fas fa-paperclip"></i> Upload Files for Text Extraction</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('imageInput').click()" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                                <i class="fas fa-image"></i> Image
+                            </button>
+                            <input type="file" id="imageInput" name="image" accept="image/*" style="display:none" onchange="handleFileSelect(this, 'image')">
+                            
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('pdfInput').click()" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
+                            <input type="file" id="pdfInput" name="pdf" accept=".pdf" style="display:none" onchange="handleFileSelect(this, 'pdf')">
+                            
+                            <button type="button" class="btn btn-primary" onclick="document.getElementById('audioInput').click()" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <i class="fas fa-microphone"></i> Audio
+                            </button>
+                            <input type="file" id="audioInput" name="audio" accept="audio/*" style="display:none" onchange="handleFileSelect(this, 'audio')">
+                        </div>
+                        <div id="selectedFiles" style="margin-top: 10px;"></div>
+                    </div>
+
+                    <div id="fileInput" class="tab-content" style="display: none;">
+                        <div class="form-group">
+                            <label for="hadithFile">
+                                <i class="fas fa-file-upload"></i> Upload File
+                            </label>
+                            <input type="file" name="hadith_file" id="hadithFile" accept=".txt,.pdf,.doc,.docx">
+                            <p style="margin-top: 8px; font-size: 0.85rem; color: #666;">
+                                <i class="fas fa-info-circle"></i> Supported formats: TXT, PDF, DOC, DOCX
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sourceRef">
+                            <i class="fas fa-book"></i> Source (Optional)
+                        </label>
+                        <input type="text" name="source" id="sourceRef" placeholder="e.g., Sahih Bukhari, Book 2, Hadith 13">
+                    </div>
+
+                    <div class="options-grid">
+                        <label class="option-box">
+                            <input type="checkbox" name="deep_analysis" checked>
+                            <div>
+                                <h4><i class="fas fa-microscope"></i> Deep Analysis</h4>
+                                <p>Comprehensive AI analysis with detailed insights</p>
+                            </div>
+                        </label>
+                        <label class="option-box">
+                            <input type="checkbox" name="chain_analysis" checked>
+                            <div>
+                                <h4><i class="fas fa-link"></i> Chain Analysis</h4>
+                                <p>Analyze isnad chain and narrator credibility</p>
+                            </div>
+                        </label>
+                        <label class="option-box">
+                            <input type="checkbox" name="context_analysis">
+                            <div>
+                                <h4><i class="fas fa-history"></i> Context Analysis</h4>
+                                <p>Historical and contextual background analysis</p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="btn-row">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-brain"></i> Analyze Hadith
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                            <i class="fas fa-eraser"></i> Clear
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Loading State -->
+                <div class="loading-state" id="loadingState">
+                    <div class="spinner"></div>
+                    <h3><i class="fas fa-cog fa-spin"></i> Analyzing Hadith...</h3>
+                    <p>Our AI is examining the text, chain of narration, and historical context.</p>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-panel" id="resultsPanel">
+                <div class="results-header">
+                    <h2>
+                        <i class="fas fa-chart-bar"></i>
+                        Analysis Results
+                        <span class="grade-badge grade-unknown" id="gradeBadge">Unknown</span>
+                    </h2>
+                    <div class="result-actions">
+                        <button class="btn-icon" onclick="exportResults()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <button class="btn-icon" onclick="shareResults()">
+                            <i class="fas fa-share-alt"></i> Share
+                        </button>
+                    </div>
+                </div>
+
+                <div class="analysis-content" id="analysisContent">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Empty State (shown initially) -->
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-search"></i>
+                <h3>No Analysis Yet</h3>
+                <p>Enter a hadith text or upload a file to begin AI analysis</p>
+            </div>
+
+            <!-- Recent Analyses -->
+            <div class="recent-panel">
+                <div class="panel-header">
+                    <i class="fas fa-history"></i>
+                    <h3>Recent Analyses</h3>
+                </div>
+                <div class="recent-list" id="recentList">
+                    <div class="recent-item">
+                        <div class="recent-grade grade-sahih">Sahih</div>
+                        <div class="recent-info">
+                            <h4>Hadith on Prayer</h4>
+                            <p>The prayer of a person who does not perform...</p>
+                        </div>
+                        <div class="recent-time">2 hours ago</div>
+                    </div>
+                    <div class="recent-item">
+                        <div class="recent-grade grade-hasan">Hasan</div>
+                        <div class="recent-info">
+                            <h4>Hadith on Charity</h4>
+                            <p>Charity does not diminish wealth...</p>
+                        </div>
+                        <div class="recent-time">1 day ago</div>
+                    </div>
+                    <div class="recent-item">
+                        <div class="recent-grade grade-daif">Da'if</div>
+                        <div class="recent-info">
+                            <h4>Hadith on Fasting</h4>
+                            <p>Fast when you see the new moon...</p>
+                        </div>
+                        <div class="recent-time">3 days ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.tab-btn').classList.add('active');
+
+            document.getElementById('textInput').style.display = tab === 'text' ? 'block' : 'none';
+            document.getElementById('fileInput').style.display = tab === 'file' ? 'block' : 'none';
+        }
+
+        // Character count
+        document.getElementById('hadithText').addEventListener('input', function() {
+            const count = this.value.length;
+            document.querySelector('.char-count').textContent = `${count} / 10000 characters`;
+        });
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('analyzerForm').reset();
+            document.querySelector('.char-count').textContent = '0 / 10000 characters';
+            document.getElementById('resultsPanel').classList.remove('active');
+            document.getElementById('emptyState').style.display = 'block';
+        }
+
+        // Form submission
+        document.getElementById('analyzerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingState = document.getElementById('loadingState');
+            const resultsPanel = document.getElementById('resultsPanel');
+            const emptyState = document.getElementById('emptyState');
+
+            // Show loading
+            submitBtn.disabled = true;
+            loadingState.classList.add('active');
+            resultsPanel.classList.remove('active');
+            emptyState.style.display = 'none';
+
+            try {
+                const response = await fetch('/analyze-full', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'Analysis failed');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                loadingState.classList.remove('active');
+            }
+        });
+
+        function displayResults(data) {
+            const resultsPanel = document.getElementById('resultsPanel');
+            const gradeBadge = document.getElementById('gradeBadge');
+            const analysisContent = document.getElementById('analysisContent');
+
+            // Set grade badge
+            const grade = data.grade || 'Unknown';
+            gradeBadge.textContent = grade;
+            gradeBadge.className = 'grade-badge';
+
+            if (grade.toLowerCase().includes('sahih')) {
+                gradeBadge.classList.add('grade-sahih');
+            } else if (grade.toLowerCase().includes('hasan')) {
+                gradeBadge.classList.add('grade-hasan');
+            } else if (grade.toLowerCase().includes('daif') || grade.toLowerCase().includes('weak') || grade.toLowerCase().includes("da'if")) {
+                gradeBadge.classList.add('grade-daif');
+            } else if (grade.toLowerCase().includes('mawdu')) {
+                gradeBadge.classList.add('grade-mawdu');
+            } else {
+                gradeBadge.classList.add('grade-unknown');
+            }
+
+            // Build analysis content
+            let content = '';
+
+            if (data.confidence) {
+                content += `
+                    <div class="analysis-box">
+                        <h4><i class="fas fa-percentage"></i> Confidence Score</h4>
+                        <p>${data.confidence}</p>
+                    </div>
+                `;
+            }
+
+            if (data.source) {
+                content += `
+                    <div class="analysis-box">
+                        <h4><i class="fas fa-book-open"></i> Source</h4>
+                        <p>${data.source}</p>
+                    </div>
+                `;
+            }
+
+            if (data.warning) {
+                content += `
+                    <div class="analysis-box">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Analysis Note</h4>
+                        <p>${data.warning}</p>
+                    </div>
+                `;
+            }
+
+            if (data.isnad) {
+                content += `
+                    <div class="analysis-box">
+                        <h4><i class="fas fa-link"></i> Chain of Narration (Isnad)</h4>
+                        <p>${data.isnad}</p>
+                    </div>
+                `;
+            }
+
+            analysisContent.innerHTML = content || '<p>No detailed analysis available.</p>';
+            resultsPanel.classList.add('active');
+        }
+
+        function showError(message) {
+            const analysisContent = document.getElementById('analysisContent');
+            analysisContent.innerHTML = `
+                <div class="analysis-box" style="border-left-color: #dc3545;">
+                    <h4 style="color: #dc3545;"><i class="fas fa-exclamation-circle"></i> Error</h4>
+                    <p>${message}</p>
+                </div>
+            `;
+            document.getElementById('resultsPanel').classList.add('active');
+        }
+
+        function handleFileSelect(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const container = document.getElementById('selectedFiles');
+            const div = document.createElement('div');
+            div.className = 'file-item';
+            div.style.cssText = 'display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f1f5f9; border-radius: 6px; margin-bottom: 8px; font-size: 0.9rem;';
+            
+            const icon = type === 'image' ? 'fa-image' : type === 'pdf' ? 'fa-file-pdf' : 'fa-music';
+            const color = type === 'image' ? '#3b82f6' : type === 'pdf' ? '#ef4444' : '#f59e0b';
+            
+            div.innerHTML = `
+                <i class="fas ${icon}" style="color: ${color};"></i>
+                <span>${file.name}</span>
+                <button type="button" onclick="this.parentElement.remove(); document.getElementById('${type}Input').value = '';" 
+                    style="margin-left: auto; padding: 2px 8px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.75rem;">Remove</button>
+            `;
+            
+            // Remove existing file of same type
+            const existing = container.querySelectorAll('.file-item');
+            existing.forEach(item => {
+                if (item.innerHTML.includes(icon)) item.remove();
+            });
+            
+            container.appendChild(div);
+        }
+
+        function exportResults() {
+            alert('Export feature coming soon!');
+        }
+
+        function shareResults() {
+            alert('Share feature coming soon!');
+        }
+    </script>
+    
+    <!-- Floating AI Assistant -->
+    {% include 'floating_ai_assistant.html' %}
+</body>
+</html>

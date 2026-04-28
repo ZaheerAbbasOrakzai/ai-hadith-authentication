@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Search authentic hadith database - AI Hadith Authenticator">
+    <meta name="keywords" content="hadith search, islam, authentic hadith, prophet muhammad">
+    <title>Search Hadith - AI Hadith Authenticator</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    
+    <!-- Theme -->
+    <script>
+        document.documentElement.className = 'loading';
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container flex justify-between items-center">
+            <a href="{{ url_for('index') }}" class="navbar-brand">
+                🕌 AI Hadith Authenticator
+            </a>
+            
+            <div class="navbar-nav">
+                <a href="{{ url_for('index') }}" class="nav-link">
+                    🏠 Home
+                </a>
+                <a href="{{ url_for('hadith_analyzer') }}" class="nav-link">
+                    🔍 Analyzer
+                </a>
+                <a href="{{ url_for('search') }}" class="nav-link active">
+                    📚 Search
+                </a>
+                <a href="{{ url_for('quran') }}" class="nav-link">
+                    📖 Quran
+                </a>
+                <a href="{{ url_for('chat_page') }}" class="nav-link">
+                    💬 Chat
+                </a>
+                <a href="{{ url_for('logout') }}" class="nav-link">
+                    🚪 Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Search Section -->
+        <section class="p-lg">
+            <div class="card glass">
+                <div class="card-header">
+                    <h1 class="card-title">📚 Search Hadith Database</h1>
+                    <p class="text-gray">Search through authentic hadith collections</p>
+                </div>
+                
+                <!-- Search Form -->
+                <form id="searchForm" class="space-y-lg">
+                    <div class="form-group">
+                        <label class="form-label" for="searchInput">Search Hadith</label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="searchInput" 
+                                name="q" 
+                                class="form-input pr-12" 
+                                placeholder="Search hadith text, narrator, or topic..."
+                                autocomplete="off"
+                            >
+                            <button type="submit" class="absolute right-2 top-2 btn btn-primary btn-sm">
+                                🔍
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Search Options -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+                        <div class="form-group">
+                            <label class="form-label" for="collection">Collection</label>
+                            <select id="collection" name="collection" class="form-input">
+                                <option value="all">All Collections</option>
+                                <option value="sahih-bukhari">Sahih Bukhari</option>
+                                <option value="sahih-muslim">Sahih Muslim</option>
+                                <option value="sunan-abu-dawud">Sunan Abu Dawud</option>
+                                <option value="jami-at-tirmidhi">Jami' at-Tirmidhi</option>
+                                <option value="sunan-nasai">Sunan an-Nasa'i</option>
+                                <option value="sunan-ibn-majah">Sunan Ibn Majah</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="language">Language</label>
+                            <select id="language" name="language" class="form-input">
+                                <option value="all">All Languages</option>
+                                <option value="en">English</option>
+                                <option value="ar">Arabic</option>
+                                <option value="ur">Urdu</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="grade">Authenticity Grade</label>
+                            <select id="grade" name="grade" class="form-input">
+                                <option value="all">All Grades</option>
+                                <option value="sahih">Sahih (Authentic)</option>
+                                <option value="hasan">Hasan (Good)</option>
+                                <option value="daif">Da'if (Weak)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Search Buttons -->
+                    <div class="flex gap-md justify-center">
+                        <button type="submit" class="btn btn-primary">
+                            🔍 Search Hadith
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="clearSearch()">
+                            🔄 Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Search Results -->
+        <section class="p-lg">
+            <div class="card glass">
+                <div class="card-header">
+                    <h2 class="card-title">📊 Search Results</h2>
+                    <div class="flex items-center gap-sm">
+                        <span class="text-gray">Found:</span>
+                        <span id="resultCount" class="text-primary font-bold">0</span>
+                        <span class="text-gray">hadith</span>
+                    </div>
+                </div>
+                
+                <!-- Results Container -->
+                <div id="searchResults" class="space-y-md">
+                    <!-- Search results will be displayed here -->
+                    <div class="text-center p-lg">
+                        <div class="text-4xl text-gray mb-md">📚</div>
+                        <p class="text-gray">Enter search terms to find authentic hadith</p>
+                        <p class="text-sm text-gray mt-sm">Try searching for: "intention", "prayer", "charity", or "prophet"</p>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination" class="flex justify-center gap-sm mt-lg hidden">
+                    <!-- Pagination will be displayed here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Popular Searches -->
+        <section class="p-lg">
+            <div class="card glass">
+                <div class="card-header">
+                    <h2 class="card-title">🔥 Popular Searches</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+                    <button class="btn btn-secondary text-left" onclick="searchTerm('intention')">
+                        🎯 Intention (Niyyah)
+                    </button>
+                    <button class="btn btn-secondary text-left" onclick="searchTerm('prayer')">
+                        🙏 Prayer (Salah)
+                    </button>
+                    <button class="btn btn-secondary text-left" onclick="searchTerm('charity')">
+                        💝 Charity (Sadaqah)
+                    </button>
+                    <button class="btn btn-secondary text-left" onclick="searchTerm('knowledge')">
+                        📖 Knowledge (Ilm)
+                    </button>
+                    <button class="btn btn-secondary text-left" onclick="searchTerm('patience')">
+                        ⏳ Patience (Sabr)
+                    </button>
+                    <button class="btn btn-secondary text-left" onclick="searchTerm('honesty')">
+                        🤝 Honesty (Sidq)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search Tips -->
+        <section class="p-lg">
+            <div class="card glass">
+                <div class="card-header">
+                    <h2 class="card-title">💡 Search Tips</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+                    <div>
+                        <h3 class="text-primary mb-md">🔍 Effective Searching</h3>
+                        <ul class="text-gray space-y-sm">
+                            <li>• Use specific keywords for better results</li>
+                            <li>• Try both English and Arabic terms</li>
+                            <li>• Search by narrator names (e.g., "Abu Hurairah")</li>
+                            <li>• Include topic keywords (e.g., "marriage", "business")</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-primary mb-md">📚 Understanding Results</h3>
+                        <ul class="text-gray space-y-sm">
+                            <li>• <strong>Sahih:</strong> Authentic chain of narrators</li>
+                            <li>• <strong>Hasan:</strong> Good chain with minor issues</li>
+                            <li>• <strong>Da'if:</strong> Weak chain of narrators</li>
+                            <li>• <strong>Collection:</strong> Source book of hadith</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass mt-lg">
+        <div class="container text-center">
+            <p class="text-gray">
+                © 2025 AI Hadith Authenticator. Accessing authentic Islamic heritage with modern technology.
+            </p>
+            <div class="flex gap-lg justify-center mt-md">
+                <a href="#" class="nav-link">Privacy</a>
+                <a href="#" class="nav-link">Terms</a>
+                <a href="#" class="nav-link">About</a>
+                <a href="#" class="nav-link">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    
+    <!-- Additional Search JavaScript -->
+    <script>
+        let currentResults = [];
+        let currentPage = 1;
+        const resultsPerPage = 10;
+
+        // Search functionality
+        document.getElementById('searchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (!query) {
+                showAlert('Please enter search terms', 'warning');
+                return;
+            }
+            
+            await performSearch(query);
+        });
+
+        // Perform search
+        async function performSearch(query, page = 1) {
+            const searchInput = document.getElementById('searchInput');
+            const resultsContainer = document.getElementById('searchResults');
+            const resultCount = document.getElementById('resultCount');
+            
+            showLoading(searchInput, true);
+            
+            try {
+                const params = new URLSearchParams({
+                    q: query,
+                    page: page,
+                    collection: document.getElementById('collection').value,
+                    language: document.getElementById('language').value,
+                    grade: document.getElementById('grade').value
+                });
+                
+                const result = await apiRequest(`/search?${params}`);
+                
+                currentResults = result.results || [];
+                currentPage = page;
+                
+                displayResults(currentResults);
+                updatePagination(result.total, page);
+                resultCount.textContent = result.total || 0;
+                
+            } catch (error) {
+                resultsContainer.innerHTML = `
+                    <div class="text-center p-lg">
+                        <p class="text-error">Search failed. Please try again.</p>
+                    </div>
+                `;
+            } finally {
+                showLoading(searchInput, false);
+            }
+        }
+
+        // Display search results
+        function displayResults(results) {
+            const container = document.getElementById('searchResults');
+            
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center p-lg">
+                        <div class="text-4xl text-gray mb-md">🔍</div>
+                        <p class="text-gray">No hadith found matching your search</p>
+                        <p class="text-sm text-gray mt-sm">Try different keywords or browse all collections</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const resultsHtml = results.map(hadith => `
+                <div class="border-bottom border-gray-600 pb-md mb-md">
+                    <div class="flex justify-between items-start mb-sm">
+                        <div>
+                            <h3 class="text-primary font-semibold">${escapeHtml(hadith.english || 'Unknown')}</h3>
+                            <div class="flex gap-sm mt-sm">
+                                <span class="badge badge-${hadith.grade === 'Sahih' ? 'success' : hadith.grade === 'Hasan' ? 'warning' : 'error'}">
+                                    ${escapeHtml(hadith.grade || 'Unknown')}
+                                </span>
+                                <span class="text-gray text-sm">${escapeHtml(hadith.book || 'Unknown')}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${hadith.arabic ? `<p class="text-arabic mb-sm">${escapeHtml(hadith.arabic)}</p>` : ''}
+                    <p class="text-gray mb-md">${escapeHtml(hadith.english || '')}</p>
+                    
+                    <div class="flex gap-sm">
+                        <button class="btn btn-secondary btn-sm" onclick="analyzeText('${escapeHtml(hadith.english || '')}')">
+                            🤖 Analyze
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="copyToClipboard('${escapeHtml(hadith.english || '')}')">
+                            📋 Copy
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="shareHadith('${escapeHtml(hadith.english || '')}')">
+                            📤 Share
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = resultsHtml;
+        }
+
+        // Update pagination
+        function updatePagination(total, currentPage) {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(total / resultsPerPage);
+            
+            if (totalPages <= 1) {
+                pagination.classList.add('hidden');
+                return;
+            }
+            
+            pagination.classList.remove('hidden');
+            
+            let paginationHtml = '';
+            
+            // Previous button
+            if (currentPage > 1) {
+                paginationHtml += `<button class="btn btn-secondary btn-sm" onclick="performSearch('${document.getElementById('searchInput').value}', ${currentPage - 1})">← Previous</button>`;
+            }
+            
+            // Page numbers
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const isActive = i === currentPage ? 'btn-primary' : 'btn-secondary';
+                paginationHtml += `<button class="btn ${isActive} btn-sm" onclick="performSearch('${document.getElementById('searchInput').value}', ${i})">${i}</button>`;
+            }
+            
+            // Next button
+            if (currentPage < totalPages) {
+                paginationHtml += `<button class="btn btn-secondary btn-sm" onclick="performSearch('${document.getElementById('searchInput').value}', ${currentPage + 1})">Next →</button>`;
+            }
+            
+            pagination.innerHTML = paginationHtml;
+        }
+
+        // Clear search
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('collection').value = 'all';
+            document.getElementById('language').value = 'all';
+            document.getElementById('grade').value = 'all';
+            document.getElementById('searchResults').innerHTML = `
+                <div class="text-center p-lg">
+                    <div class="text-4xl text-gray mb-md">📚</div>
+                    <p class="text-gray">Enter search terms to find authentic hadith</p>
+                </div>
+            `;
+            document.getElementById('pagination').classList.add('hidden');
+            document.getElementById('resultCount').textContent = '0';
+        }
+
+        // Search specific term
+        function searchTerm(term) {
+            document.getElementById('searchInput').value = term;
+            document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Share hadith
+        function shareHadith(text) {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Hadith from AI Hadith Authenticator',
+                    text: text
+                });
+            } else {
+                copyToClipboard(text);
+                showAlert('Hadith copied to clipboard!', 'success');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            document.documentElement.classList.remove('loading');
+            document.getElementById('searchInput').focus();
+        });
+    </script>
+    
+    <!-- Floating AI Assistant -->
+    {% include 'floating_ai_assistant.html' %}
+</body>
+</html>

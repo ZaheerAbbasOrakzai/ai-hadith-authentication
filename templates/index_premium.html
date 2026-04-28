@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Hadith Authenticator - Advanced AI-powered authentication of Islamic hadith with scholarly precision">
+    <meta name="keywords" content="hadith authentication, islamic ai, sahih hadith, hadith verification, kutub al-sittah">
+    <meta name="author" content="AI Hadith Authenticator">
+    <meta name="theme-color" content="#0f766e">
+    
+    <title>AI Hadith Authenticator | Authenticate Islamic Hadith with AI Precision</title>
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕌</text></svg>">
+    
+    <!-- Prevent Flash -->
+    <style>
+        html { visibility: hidden; opacity: 0; transition: opacity 0.3s ease; }
+        html.ready { visibility: visible; opacity: 1; }
+    </style>
+</head>
+<body>
+    <!-- Animated Background Canvas -->
+    <canvas id="particleCanvas" class="particle-bg"></canvas>
+    
+    <!-- Gradient Overlay -->
+    <div class="gradient-overlay"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <span class="brand-icon">🕌</span>
+                <span class="brand-text">AI Hadith<span class="brand-accent">Authenticator</span></span>
+            </a>
+            
+            <div class="nav-links" id="navLinks">
+                {% if is_logged_in() %}
+                    <a href="{{ url_for('hadith_analyzer') }}" class="nav-link" data-hover>
+                        <i class="fas fa-microscope"></i>
+                        <span>Analyzer</span>
+                    </a>
+                    <a href="{{ url_for('search') }}" class="nav-link" data-hover>
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </a>
+                    <a href="{{ url_for('quran') }}" class="nav-link" data-hover>
+                        <i class="fas fa-book-quran"></i>
+                        <span>Quran</span>
+                    </a>
+                    <a href="{{ url_for('collections') }}" class="nav-link" data-hover>
+                        <i class="fas fa-layer-group"></i>
+                        <span>Collections</span>
+                    </a>
+                    <a href="{{ url_for('chat_page') }}" class="nav-link" data-hover>
+                        <i class="fas fa-comments"></i>
+                        <span>AI Chat</span>
+                    </a>
+                    <div class="nav-actions">
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                {% else %}
+                    <a href="#features" class="nav-link" data-hover>
+                        <span>Features</span>
+                    </a>
+                    <a href="#how-it-works" class="nav-link" data-hover>
+                        <span>How It Works</span>
+                    </a>
+                    <a href="#technology" class="nav-link" data-hover>
+                        <span>Technology</span>
+                    </a>
+                    <div class="nav-actions">
+                        <a href="{{ url_for('login') }}" class="btn btn-ghost btn-sm">Sign In</a>
+                        <a href="{{ url_for('signup') }}" class="btn btn-primary btn-sm">Get Started</a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% if is_logged_in() %}
+            <!-- Dashboard Hero -->
+            <section class="hero-dashboard">
+                <div class="container">
+                    <div class="hero-content" data-animate="fade-up">
+                        <div class="welcome-badge">
+                            <i class="fas fa-star"></i>
+                            <span>Welcome Back</span>
+                        </div>
+                        <h1 class="hero-title">
+                            Assalamu Alaikum, <span class="gradient-text">{{ name }}</span>
+                        </h1>
+                        <p class="hero-subtitle">
+                            Continue your journey of authenticating hadith with AI-powered precision
+                        </p>
+                    </div>
+                    
+                    <!-- Quick Actions Grid -->
+                    <div class="dashboard-grid">
+                        <a href="{{ url_for('hadith_analyzer') }}" class="dashboard-card feature-card" data-animate="fade-up" data-delay="100">
+                            <div class="card-glow"></div>
+                            <div class="card-icon">
+                                <i class="fas fa-microscope"></i>
+                            </div>
+                            <h3>Hadith Analyzer</h3>
+                            <p>Authenticate hadith using advanced AI models</p>
+                            <div class="card-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </a>
+                        
+                        <a href="{{ url_for('search') }}" class="dashboard-card feature-card" data-animate="fade-up" data-delay="200">
+                            <div class="card-glow"></div>
+                            <div class="card-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h3>Search Database</h3>
+                            <p>Explore authentic hadith collections</p>
+                            <div class="card-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </a>
+                        
+                        <a href="{{ url_for('quran') }}" class="dashboard-card feature-card" data-animate="fade-up" data-delay="300">
+                            <div class="card-glow"></div>
+                            <div class="card-icon">
+                                <i class="fas fa-book-quran"></i>
+                            </div>
+                            <h3>Quran Reader</h3>
+                            <p>Read and study the Holy Quran</p>
+                            <div class="card-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </a>
+                        
+                        <a href="{{ url_for('chat_page') }}" class="dashboard-card feature-card" data-animate="fade-up" data-delay="400">
+                            <div class="card-glow"></div>
+                            <div class="card-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h3>AI Assistant</h3>
+                            <p>Get Islamic knowledge assistance</p>
+                            <div class="card-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Stats Section -->
+                    <div class="stats-section" data-animate="fade-up" data-delay="500">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number" data-count="0">0</div>
+                                <div class="stat-label">Analyses Today</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" data-count="0">0</div>
+                                <div class="stat-label">Total Analyses</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" data-count="10000">10K+</div>
+                                <div class="stat-label">Hadith Database</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" data-count="95">95%</div>
+                                <div class="stat-label">Accuracy Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        {% else %}
+            <!-- Landing Hero -->
+            <section class="hero-landing">
+                <div class="container">
+                    <div class="hero-content" data-animate="fade-up">
+                        <div class="hero-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Trusted by Scholars Worldwide</span>
+                        </div>
+                        
+                        <h1 class="hero-title mega">
+                            Authenticate Hadith with
+                            <span class="gradient-text">AI Precision</span>
+                        </h1>
+                        
+                        <p class="hero-description">
+                            Advanced artificial intelligence meets classical Islamic scholarship. 
+                            Verify hadith authenticity, explore Quranic wisdom, and access scholarly 
+                            resources with unprecedented accuracy and speed.
+                        </p>
+                        
+                        <div class="hero-actions">
+                            <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg btn-glow" data-hover>
+                                <span>Start Authenticating</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            <a href="#how-it-works" class="btn btn-outline btn-lg" data-hover>
+                                <i class="fas fa-play-circle"></i>
+                                <span>See How It Works</span>
+                            </a>
+                        </div>
+                        
+                        <div class="hero-trust">
+                            <div class="trust-avatars">
+                                <img src="https://ui-avatars.com/api/?name=Scholar+1&background=0f766e&color=fff" alt="Scholar">
+                                <img src="https://ui-avatars.com/api/?name=Scholar+2&background=14b8a6&color=fff" alt="Scholar">
+                                <img src="https://ui-avatars.com/api/?name=Scholar+3&background=f59e0b&color=fff" alt="Scholar">
+                                <span class="trust-count">+500</span>
+                            </div>
+                            <p>Scholars & Students Trust Our Platform</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Hero Visual -->
+                    <div class="hero-visual" data-animate="fade-left" data-delay="300">
+                        <div class="visual-card">
+                            <div class="card-header">
+                                <div class="card-dots">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </div>
+                                <span class="card-title">Hadith Analysis</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="analysis-item">
+                                    <div class="analysis-icon success">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="analysis-content">
+                                        <span class="analysis-label">Grade</span>
+                                        <span class="analysis-value">Sahih (Authentic)</span>
+                                    </div>
+                                    <div class="analysis-score">98%</div>
+                                </div>
+                                <div class="analysis-item">
+                                    <div class="analysis-icon info">
+                                        <i class="fas fa-link"></i>
+                                    </div>
+                                    <div class="analysis-content">
+                                        <span class="analysis-label">Chain</span>
+                                        <span class="analysis-value">Verified Isnad</span>
+                                    </div>
+                                    <div class="analysis-score">✓</div>
+                                </div>
+                                <div class="analysis-item">
+                                    <div class="analysis-icon warning">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <div class="analysis-content">
+                                        <span class="analysis-label">Source</span>
+                                        <span class="analysis-value">Sahih Bukhari</span>
+                                    </div>
+                                    <div class="analysis-score">#184</div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 98%"></div>
+                                </div>
+                                <span class="progress-text">Authenticity Score: 98%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Scroll Indicator -->
+                <div class="scroll-indicator">
+                    <div class="mouse">
+                        <div class="wheel"></div>
+                    </div>
+                    <span>Scroll to explore</span>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section id="features" class="features-section">
+                <div class="container">
+                    <div class="section-header" data-animate="fade-up">
+                        <span class="section-badge">Features</span>
+                        <h2 class="section-title">Powerful Tools for <span class="gradient-text">Authentic Knowledge</span></h2>
+                        <p class="section-description">
+                            Comprehensive suite of AI-powered tools designed for scholars, students, and seekers of authentic Islamic knowledge.
+                        </p>
+                    </div>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card-large" data-animate="fade-up" data-delay="100">
+                            <div class="card-glow"></div>
+                            <div class="feature-icon-large">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h3>AI Hadith Analysis</h3>
+                            <p>Advanced machine learning models trained on classical Islamic texts to verify hadith authenticity with scholarly precision.</p>
+                            <ul class="feature-list">
+                                <li><i class="fas fa-check"></i> Chain of transmission verification</li>
+                                <li><i class="fas fa-check"></i> Narrator biographical analysis</li>
+                                <li><i class="fas fa-check"></i> Cross-reference with Kutub al-Sittah</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card-large" data-animate="fade-up" data-delay="200">
+                            <div class="card-glow"></div>
+                            <div class="feature-icon-large">
+                                <i class="fas fa-search-plus"></i>
+                            </div>
+                            <h3>Intelligent Search</h3>
+                            <p>Semantic search across 10,000+ authentic hadith with natural language understanding and contextual results.</p>
+                            <ul class="feature-list">
+                                <li><i class="fas fa-check"></i> Natural language queries</li>
+                                <li><i class="fas fa-check"></i> Topical categorization</li>
+                                <li><i class="fas fa-check"></i> Related hadith suggestions</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card-large" data-animate="fade-up" data-delay="300">
+                            <div class="card-glow"></div>
+                            <div class="feature-icon-large">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <h3>Quran Explorer</h3>
+                            <p>Complete Quran with multiple translations, tafsir, and thematic study tools for deep understanding.</p>
+                            <ul class="feature-list">
+                                <li><i class="fas fa-check"></i> Multiple translations</li>
+                                <li><i class="fas fa-check"></i> Word-by-word analysis</li>
+                                <li><i class="fas fa-check"></i> Thematic exploration</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card-large" data-animate="fade-up" data-delay="400">
+                            <div class="card-glow"></div>
+                            <div class="feature-icon-large">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <h3>AI Scholar Assistant</h3>
+                            <p>Conversational AI trained on Islamic jurisprudence, theology, and classical texts for instant scholarly guidance.</p>
+                            <ul class="feature-list">
+                                <li><i class="fas fa-check"></i> 24/7 availability</li>
+                                <li><i class="fas fa-check"></i> Multi-language support</li>
+                                <li><i class="fas fa-check"></i> Scholarly references</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Swipe Indicators -->
+                    <div class="swipe-indicator" id="features-indicator">
+                        <div class="swipe-dot active"></div>
+                        <div class="swipe-dot"></div>
+                        <div class="swipe-dot"></div>
+                        <div class="swipe-dot"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How It Works -->
+            <section id="how-it-works" class="process-section">
+                <div class="container">
+                    <div class="section-header" data-animate="fade-up">
+                        <span class="section-badge">Process</span>
+                        <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
+                        <p class="section-description">
+                            Simple yet powerful workflow designed for both scholars and students.
+                        </p>
+                    </div>
+                    
+                    <div class="process-steps">
+                        <div class="process-step" data-animate="fade-up" data-delay="100">
+                            <div class="step-number">01</div>
+                            <div class="step-content">
+                                <div class="step-icon">
+                                    <i class="fas fa-upload"></i>
+                                </div>
+                                <h3>Input</h3>
+                                <p>Enter hadith text, upload manuscripts, or provide audio recordings for analysis.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="process-connector"></div>
+                        
+                        <div class="process-step" data-animate="fade-up" data-delay="200">
+                            <div class="step-number">02</div>
+                            <div class="step-content">
+                                <div class="step-icon">
+                                    <i class="fas fa-microchip"></i>
+                                </div>
+                                <h3>AI Analysis</h3>
+                                <p>Our models analyze chain authenticity, narrator reliability, and textual integrity.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="process-connector"></div>
+                        
+                        <div class="process-step" data-animate="fade-up" data-delay="300">
+                            <div class="step-number">03</div>
+                            <div class="step-content">
+                                <div class="step-icon">
+                                    <i class="fas fa-certificate"></i>
+                                </div>
+                                <h3>Verification</h3>
+                                <p>Receive comprehensive reports with authenticity grades and scholarly citations.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technology Section -->
+            <section id="technology" class="tech-section">
+                <div class="container">
+                    <div class="tech-content">
+                        <div class="tech-text" data-animate="fade-right">
+                            <span class="section-badge">Technology</span>
+                            <h2 class="section-title">Powered by <span class="gradient-text">Advanced AI</span></h2>
+                            <p class="tech-description">
+                                Built on cutting-edge machine learning models specifically trained for Islamic text analysis and authentication.
+                            </p>
+                            
+                            <div class="tech-features">
+                                <div class="tech-item">
+                                    <div class="tech-icon">
+                                        <i class="fas fa-network-wired"></i>
+                                    </div>
+                                    <div class="tech-info">
+                                        <h4>Neural Networks</h4>
+                                        <p>Deep learning models for pattern recognition</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="tech-item">
+                                    <div class="tech-icon">
+                                        <i class="fas fa-language"></i>
+                                    </div>
+                                    <div class="tech-info">
+                                        <h4>NLP Processing</h4>
+                                        <p>Natural language understanding for Arabic texts</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="tech-item">
+                                    <div class="tech-icon">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <div class="tech-info">
+                                        <h4>Knowledge Base</h4>
+                                        <p>Comprehensive database of classical Islamic texts</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Swipe Indicators -->
+                            <div class="swipe-indicator" id="tech-indicator">
+                                <div class="swipe-dot active"></div>
+                                <div class="swipe-dot"></div>
+                                <div class="swipe-dot"></div>
+                            </div>
+                        </div>
+
+                        <div class="tech-visual" data-animate="fade-left">
+                            <div class="tech-card">
+                                <div class="tech-metric">
+                                    <span class="metric-value">10K+</span>
+                                    <span class="metric-label">Hadith Analyzed</span>
+                                </div>
+                                <div class="tech-metric">
+                                    <span class="metric-value">95%</span>
+                                    <span class="metric-label">Accuracy Rate</span>
+                                </div>
+                                <div class="tech-metric">
+                                    <span class="metric-value">50ms</span>
+                                    <span class="metric-label">Response Time</span>
+                                </div>
+                                <div class="tech-metric">
+                                    <span class="metric-value">500+</span>
+                                    <span class="metric-label">Active Scholars</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testimonials Section -->
+            <section id="testimonials" class="testimonials-section">
+                <div class="container">
+                    <div class="section-header" data-animate="fade-up">
+                        <span class="section-badge">Testimonials</span>
+                        <h2 class="section-title">Trusted by <span class="gradient-text">Scholars</span></h2>
+                        <p class="section-description">
+                            See what Islamic scholars and students say about our platform.
+                        </p>
+                    </div>
+
+                    <div class="testimonials-grid">
+                        <div class="testimonial-card" data-animate="fade-up" data-delay="100">
+                            <div class="testimonial-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">
+                                "This platform has revolutionized how I verify hadith. The AI analysis is remarkably accurate and saves hours of manual research."
+                            </p>
+                            <div class="testimonial-author">
+                                <img src="https://ui-avatars.com/api/?name=Dr+Ahmad&background=0f766e&color=fff" alt="Dr. Ahmad" class="author-avatar">
+                                <div class="author-info">
+                                    <h4>Dr. Ahmad Hassan</h4>
+                                    <p>Islamic Studies Professor</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="testimonial-card" data-animate="fade-up" data-delay="200">
+                            <div class="testimonial-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">
+                                "As a student of Islamic jurisprudence, this tool has become indispensable. The speed and accuracy of hadith verification is unmatched."
+                            </p>
+                            <div class="testimonial-author">
+                                <img src="https://ui-avatars.com/api/?name=Fatima+K&background=14b8a6&color=fff" alt="Fatima" class="author-avatar">
+                                <div class="author-info">
+                                    <h4>Fatima Khan</h4>
+                                    <p>Graduate Student</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="testimonial-card" data-animate="fade-up" data-delay="300">
+                            <div class="testimonial-stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <p class="testimonial-text">
+                                "The Quran explorer with AI assistance helps me prepare lessons faster. It's like having a research assistant available 24/7."
+                            </p>
+                            <div class="testimonial-author">
+                                <img src="https://ui-avatars.com/api/?name=Sheikh+M&background=f59e0b&color=fff" alt="Sheikh" class="author-avatar">
+                                <div class="author-info">
+                                    <h4>Sheikh Mohammed Ali</h4>
+                                    <p>Imam & Educator</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Swipe Indicators -->
+                    <div class="swipe-indicator" id="testimonials-indicator">
+                        <div class="swipe-dot active"></div>
+                        <div class="swipe-dot"></div>
+                        <div class="swipe-dot"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section id="faq" class="faq-section">
+                <div class="container">
+                    <div class="section-header" data-animate="fade-up">
+                        <span class="section-badge">FAQ</span>
+                        <h2 class="section-title">Common <span class="gradient-text">Questions</span></h2>
+                        <p class="section-description">
+                            Everything you need to know about our platform.
+                        </p>
+                    </div>
+
+                    <div class="faq-grid">
+                        <div class="faq-item" data-animate="fade-up" data-delay="100">
+                            <button class="faq-question" onclick="toggleFaq(this)">
+                                <span>How accurate is the AI hadith authentication?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Our AI models have been trained on extensive classical Islamic texts and achieve a 95% accuracy rate in hadith verification. The system cross-references with Kutub al-Sittah and other authenticated sources.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item" data-animate="fade-up" data-delay="150">
+                            <button class="faq-question" onclick="toggleFaq(this)">
+                                <span>Is my data secure on the platform?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Absolutely. We use enterprise-grade encryption (AES-256) for all data. Your personal information and research data are never shared with third parties. We comply with GDPR and other privacy regulations.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item" data-animate="fade-up" data-delay="200">
+                            <button class="faq-question" onclick="toggleFaq(this)">
+                                <span>Can I use this for academic research?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Yes! Many researchers and students use our platform for academic work. We provide proper citations and references for all analyzed hadith. Our premium plans include export features for research papers.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item" data-animate="fade-up" data-delay="250">
+                            <button class="faq-question" onclick="toggleFaq(this)">
+                                <span>What collections are included in the database?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>We include all major hadith collections: Sahih Bukhari, Sahih Muslim, Sunan Abu Dawud, Jami at-Tirmidhi, Sunan an-Nasa'i, and Sunan Ibn Majah (Kutub al-Sittah), plus additional authenticated collections.</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item" data-animate="fade-up" data-delay="300">
+                            <button class="faq-question" onclick="toggleFaq(this)">
+                                <span>Is there a mobile app available?</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <div class="faq-answer">
+                                <p>Our platform is fully responsive and works perfectly on mobile devices. Native iOS and Android apps are currently in development and will be released soon.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="cta-section">
+                <div class="container">
+                    <div class="cta-content" data-animate="fade-up">
+                        <h2 class="cta-title">Ready to Authenticate with <span class="gradient-text">Confidence?</span></h2>
+                        <p class="cta-description">
+                            Join hundreds of scholars and students using AI-powered hadith authentication.
+                        </p>
+                        <div class="cta-actions">
+                            <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg btn-glow">
+                                <span>Get Started Free</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg">
+                                <span>Sign In</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <span class="brand-icon">🕌</span>
+                    <span class="brand-text">AI Hadith<span class="brand-accent">Authenticator</span></span>
+                    <p class="footer-tagline">Authenticating Islamic knowledge with AI precision</p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Platform</h4>
+                        <a href="#features">Features</a>
+                        <a href="#how-it-works">How It Works</a>
+                        <a href="#technology">Technology</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Resources</h4>
+                        <a href="{{ url_for('hadith_analyzer') }}">Analyzer</a>
+                        <a href="{{ url_for('search') }}">Search</a>
+                        <a href="{{ url_for('quran') }}">Quran</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <a href="{{ url_for('privacy') }}">Privacy</a>
+                        <a href="{{ url_for('terms') }}">Terms</a>
+                        <a href="mailto:support@hadithauthenticator.com">Contact</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 AI Hadith Authenticator. All rights reserved.</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="#" aria-label="Discord"><i class="fab fa-discord"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <i class="fas fa-sun"></i>
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/premium.js') }}"></script>
+    
+    <!-- Floating AI Assistant -->
+    {% include 'floating_ai_assistant.html' %}
+    
+    <!-- Page Ready -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.documentElement.classList.add('ready');
+        });
+    </script>
+</body>
+</html>

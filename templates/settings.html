@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - AI Hadith Authenticator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .main-content { padding-top: 80px; min-height: 100vh; }
+        .glass-effect { background: var(--glass-bg); backdrop-filter: var(--glass-backdrop); border: 1px solid var(--glass-border); }
+        .btn-primary { background: var(--gradient-primary); color: white; padding: 0.75rem 1.5rem; border-radius: var(--radius-lg); text-decoration: none; display: inline-block; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('index') }}" class="navbar-brand">
+                <span>AI Hadith Authenticator</span>
+            </a>
+            <div class="navbar-nav">
+                <a href="{{ url_for('index') }}" class="nav-link">Dashboard</a>
+                <a href="{{ url_for('hadith_analyzer') }}" class="nav-link">Analyzer</a>
+                <a href="{{ url_for('quran') }}" class="nav-link">Quran</a>
+                <a href="{{ url_for('settings') }}" class="nav-link active">Settings</a>
+                <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content container">
+        <h1 class="text-3xl font-bold mb-8">Settings</h1>
+
+        <!-- Theme Settings -->
+        <div class="glass-effect rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4"><i class="fas fa-palette mr-2"></i>Theme</h2>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Mode</label>
+                <div class="flex gap-2">
+                    {% for mode in theme_modes %}
+                    <button class="theme-mode-btn px-4 py-2 rounded-lg border {% if mode == current_mode %}bg-green-600 text-white{% else %}bg-white text-gray-700{% endif %}"
+                            data-mode="{{ mode }}" onclick="setThemeMode('{{ mode }}')">
+                        {{ mode.title() }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-2">Accent Color</label>
+                <div class="flex gap-2 flex-wrap">
+                    {% for accent in theme_accents %}
+                    <button class="px-4 py-2 rounded-lg bg-gradient-to-r {{ accent.preview }} text-white font-medium"
+                            onclick="setThemeAccent('{{ accent.value }}')">
+                        {{ accent.label }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Settings -->
+        <div class="glass-effect rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4"><i class="fas fa-user mr-2"></i>Account</h2>
+            <div class="mb-2">
+                <span class="font-medium">Name:</span> {{ session.name }}
+            </div>
+            <div class="mb-4">
+                <span class="font-medium">Email:</span> {{ session.email }}
+            </div>
+            <a href="{{ url_for('profile') }}" class="btn-primary inline-block">Edit Profile</a>
+        </div>
+
+        <!-- About -->
+        <div class="glass-effect rounded-2xl p-6">
+            <h2 class="text-xl font-bold mb-4"><i class="fas fa-info-circle mr-2"></i>About</h2>
+            <p class="text-gray-600">AI Hadith Authenticator v1.0</p>
+            <p class="text-gray-500 text-sm mt-2">Authenticating Islamic knowledge with AI precision.</p>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script>
+        function setThemeMode(mode) {
+            fetch('/settings/theme', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({mode: mode})
+            }).then(() => location.reload());
+        }
+
+        function setThemeAccent(accent) {
+            fetch('/settings/theme', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({accent: accent})
+            }).then(() => location.reload());
+        }
+    </script>
+</body>
+</html>

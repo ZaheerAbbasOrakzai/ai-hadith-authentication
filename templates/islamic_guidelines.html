@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Deobandi (Hanafi-Maturidi) Islamic Guidelines - Authentic scholarly sources and methodology">
+    <title>Islamic Guidelines - AI Hadith Authenticator</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Amiri:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
+    
+    <style>
+        .guidelines-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .source-card {
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #10b981;
+        }
+        .scholar-badge {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin: 0.25rem;
+            font-size: 0.9rem;
+        }
+        .terminology-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .term-card {
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        .arabic-text {
+            font-family: 'Amiri', serif;
+            font-size: 1.5rem;
+            color: #10b981;
+        }
+        .priority-badge {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background Canvas -->
+    <canvas id="particleCanvas" class="particle-bg"></canvas>
+    
+    <!-- Gradient Overlay -->
+    <div class="gradient-overlay"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">
+                <span class="brand-icon">🕌</span>
+                <span class="brand-text">AI Hadith<span class="brand-accent">Authenticator</span></span>
+            </a>
+            
+            <div class="nav-links" id="navLinks">
+                <a href="{{ url_for('hadith_analyzer') }}" class="nav-link" data-hover>
+                    <i class="fas fa-microscope"></i>
+                    <span>Analyzer</span>
+                </a>
+                <a href="{{ url_for('search') }}" class="nav-link" data-hover>
+                    <i class="fas fa-search"></i>
+                    <span>Search</span>
+                </a>
+                <a href="{{ url_for('quran') }}" class="nav-link" data-hover>
+                    <i class="fas fa-book-quran"></i>
+                    <span>Quran</span>
+                </a>
+                <a href="/collections" class="nav-link" data-hover>
+                    <i class="fas fa-layer-group"></i>
+                    <span>Collections</span>
+                </a>
+                <a href="{{ url_for('islamic_guidelines') }}" class="nav-link active" data-hover>
+                    <i class="fas fa-book-open"></i>
+                    <span>Guidelines</span>
+                </a>
+                <div class="nav-actions">
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+            
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h1 class="section-title">Islamic Scholarly Guidelines</h1>
+                <p class="section-subtitle">Deobandi (Hanafi-Maturidi) Tradition - Authentic Sources & Methodology</p>
+            </div>
+
+            <!-- Introduction -->
+            <div class="guidelines-section">
+                <h2 class="text-2xl font-bold mb-4 text-green-400">
+                    <i class="fas fa-info-circle mr-2"></i>About This Framework
+                </h2>
+                <p class="text-gray-300 leading-relaxed">
+                    This platform follows the <strong>Darul Uloom Deoband tradition</strong>, adhering strictly to 
+                    <strong>Hanafi fiqh</strong> and <strong>Maturidi aqida</strong>. All Islamic content is derived 
+                    from recognized primary sources, verified fatawa, and the consensus of qualified scholars within this school.
+                </p>
+                <div class="mt-4 p-4 bg-yellow-900 bg-opacity-30 border-l-4 border-yellow-500 rounded">
+                    <p class="text-yellow-200">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Important:</strong> We avoid speculation, syncretism, or cross-madhhab generalization. 
+                        All rulings are grounded in verifiable sources and documented scholarly consensus.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Primary Fatwa Authorities -->
+            <div class="guidelines-section">
+                <h2 class="text-2xl font-bold mb-4 text-green-400">
+                    <i class="fas fa-university mr-2"></i>Primary Fatwa Authorities
+                </h2>
+                <p class="text-gray-300 mb-4">
+                    These are the highest priority sources for Islamic rulings, listed in order of authority:
+                </p>
+                
+                {% for key, source in primary_sources.items() %}
+                <div class="source-card">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-bold text-white">{{ source.name }}</h3>
+                        <span class="priority-badge">Priority {{ source.priority }}</span>
+                    </div>
+                    <p class="text-gray-300 mb-2">{{ source.description }}</p>
+                    <div class="flex items-center gap-4 text-sm">
+                        <a href="{{ source.url }}" target="_blank" class="text-green-400 hover:text-green-300">
+                            <i class="fas fa-external-link-alt mr-1"></i>{{ source.url }}
+                        </a>
+                        <span class="text-gray-400">
+                            <i class="fas fa-language mr-1"></i>
+                            {{ source.languages|join(', ') }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Core Textual Canon -->
+            <div class="guidelines-section">
+                <h2 class="text-2xl font-bold mb-4 text-green-400">
+                    <i class="fas fa-book mr-2"></i>Core Textual Canon
+                </h2>
+                
+                <!-- Aqida -->
+                <h3 class="text-xl font-semibold mb-3 text-blue-400">
+                    <i class="fas fa-star-and-crescent mr-2"></i>Aqida (Theology)
+                </h3>
+                {% for text in core_texts.aqida %}
+                <div class="source-card">
+                    <h4 class="font-bold text-white">{{ text.title }}</h4>
+                    <p class="text-sm text-gray-400">Author: {{ text.author }}</p>
+                    {% if text.note %}
+                    <p class="text-sm text-yellow-300 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>{{ text.note }}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <!-- Fiqh -->
+                <h3 class="text-xl font-semibold mb-3 mt-6 text-purple-400">
+                    <i class="fas fa-balance-scale mr-2"></i>Fiqh (Law and Worship)
+                </h3>
+                {% for text in core_texts.fiqh %}
+                <div class="source-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-bold text-white">{{ text.title }}</h4>
+                            <p class="text-sm text-gray-400">Author: {{ text.author }}</p>
+                        </div>
+                        {% if text.level %}
+                        <span class="px-3 py-1 bg-purple-600 rounded-full text-xs">{{ text.level }}</span>
+                        {% endif %}
+                    </div>
+                    {% if text.note %}
+                    <p class="text-sm text-yellow-300 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>{{ text.note }}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <!-- Tasawwuf -->
+                <h3 class="text-xl font-semibold mb-3 mt-6 text-indigo-400">
+                    <i class="fas fa-heart mr-2"></i>Tasawwuf (Spiritual Reform)
+                </h3>
+                {% for text in core_texts.tasawwuf %}
+                <div class="source-card">
+                    <h4 class="font-bold text-white">{{ text.title }}</h4>
+                    <p class="text-sm text-gray-400">Author: {{ text.author }}</p>
+                    {% if text.note %}
+                    <p class="text-sm text-yellow-300 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>{{ text.note }}
+                    </p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Recognized Scholars -->
+            <div class="guidelines-section">
+                <h2 class="text-2xl font-bold mb-4 text-green-400">
+                    <i class="fas fa-user-graduate mr-2"></i>Recognized Scholars
+                </h2>
+                
+                <h3 class="text-lg font-semibold mb-3 text-amber-400">Foundational علماء (Ulama)</h3>
+                <div class="mb-4">
+                    {% for scholar in scholars.foundational %}
+                    <span class="scholar-badge">{{ scholar }}</span>
+                    {% endfor %}
+                </div>
+
+                <h3 class="text-lg font-semibold mb-3 text-amber-400">Contemporary / Recent</h3>
+                <div>
+                    {% for scholar in scholars.contemporary %}
+                    <span class="scholar-badge">{{ scholar }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Fiqh Terminology -->
+            <div class="guidelines-section">
+                <h2 class="text-2xl font-bold mb-4 text-green-400">
+                    <i class="fas fa-language mr-2"></i>Fiqh Terminology
+                </h2>
+                <p class="text-gray-300 mb-4">
+                    Understanding these terms is essential for proper Islamic scholarship:
+                </p>
+                
+                <div class="terminology-grid">
+                    {% for key, term in terminology.items() %}
+                    <div class="term-card">
+                        <div class="arabic-text mb-2">{{ term.arabic }}</div>
+                        <div class="font-bold text-white">{{ term.transliteration }}</div>
+                        <div class="text-sm text-gray-400 mt-1">{{ term.meaning }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Methodological Principles -->
+            <div class="guidelines-section">
+                <h2 class="text-2xl font-bold mb-4 text-green-400">
+                    <i class="fas fa-cogs mr-2"></i>Methodological Principles
+                </h2>
+                <ul class="space-y-3 text-gray-300">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                        <span>All rulings must follow <strong>Hanafi usul al-fiqh</strong></span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                        <span>Aqida must remain strictly within <strong>Maturidi orthodoxy</strong></span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                        <span>Prefer primary fatwa sources over secondary summaries</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                        <span>Where اختلاف (scholarly disagreement) exists, present the راجح (dominant) opinion with citation</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-400 mr-3 mt-1"></i>
+                        <span>Ground all responses in recognized scholarly authority and documented consensus</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Output Standards -->
+            <div class="guidelines-section">
+                <h2 class="text-2xl font-bold mb-4 text-green-400">
+                    <i class="fas fa-clipboard-check mr-2"></i>Output Standards
+                </h2>
+                <p class="text-gray-300 mb-4">
+                    All Islamic content on this platform follows this structured format:
+                </p>
+                <div class="bg-gray-800 bg-opacity-50 p-4 rounded-lg border border-green-500">
+                    <pre class="text-sm text-gray-300"><strong class="text-green-400">Ruling:</strong> [Clear statement of the ruling]
+
+<strong class="text-blue-400">Evidence:</strong> [Quranic verse, Hadith, or scholarly consensus]
+
+<strong class="text-purple-400">Source:</strong> [Specific fatwa number, book reference, or scholar name]
+
+<strong class="text-amber-400">Classification:</strong> [فرض/واجب/سنت/مستحب/مباح/مکروہ/حرام]</pre>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="text-center mt-12">
+                <a href="{{ url_for('collections') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-layer-group mr-2"></i>
+                    Explore Islamic Collections
+                </a>
+                <a href="{{ url_for('chat_page') }}" class="btn btn-outline btn-lg ml-4">
+                    <i class="fas fa-comments mr-2"></i>
+                    Ask AI Assistant
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p class="mb-2">© 2025 AI Hadith Authenticator. All rights reserved.</p>
+                <p class="text-sm text-gray-400">
+                    Following Darul Uloom Deoband tradition - Hanafi fiqh & Maturidi aqida
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize particle background
+        document.addEventListener('DOMContentLoaded', function() {
+            // Particle animation
+            const canvas = document.getElementById('particleCanvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                const particles = [];
+                const particleCount = 50;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    particles.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        radius: Math.random() * 2 + 1
+                    });
+                }
+                
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    particles.forEach(p => {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        
+                        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                        
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+                        ctx.fill();
+                    });
+                    
+                    requestAnimationFrame(animate);
+                }
+                
+                animate();
+                
+                window.addEventListener('resize', () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                });
+            }
+            
+            // Mobile navigation toggle
+            const navToggle = document.getElementById('navToggle');
+            const navLinks = document.getElementById('navLinks');
+            
+            if (navToggle && navLinks) {
+                navToggle.addEventListener('click', () => {
+                    navLinks.classList.toggle('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

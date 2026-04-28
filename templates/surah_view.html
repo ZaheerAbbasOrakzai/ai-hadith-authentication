@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if surah %}{{ surah.englishName }} - {% endif %}Al-Quran | AI Hadith Authenticator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans Arabic', sans-serif;
+            background: linear-gradient(135deg, #f5e6e8 0%, #e8f0f8 50%, #e6f5f0 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        
+        .arabic-text {
+            font-family: 'Noto Sans Arabic', serif;
+            direction: rtl;
+            text-align: right;
+            line-height: 2.5;
+            font-size: 1.5rem;
+        }
+        
+        .ayah-container {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .ayah-container:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .bookmark-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .bookmark-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .bookmark-btn.bookmarked {
+            color: #10b981;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #10b981;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .surah-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .ayah-number {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Highlight bookmarked ayah */
+        .ayah-container.highlighted {
+            border: 2px solid #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('index') }}" class="flex items-center space-x-3">
+                        <i class="fas fa-book-quran text-green-600 text-2xl"></i>
+                        <span class="font-bold text-xl text-gray-800">AI Hadith Authenticator</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('index') }}" class="text-gray-600 hover:text-green-600 transition-colors">
+                        <i class="fas fa-home mr-2"></i>Home
+                    </a>
+                    <a href="{{ url_for('quran') }}" class="text-green-600 font-semibold">
+                        <i class="fas fa-book-quran mr-2"></i>Quran
+                    </a>
+                    <a href="{{ url_for('collections') }}" class="text-gray-600 hover:text-green-600 transition-colors">
+                        <i class="fas fa-layer-group mr-2"></i>Collections
+                    </a>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-gray-600">Welcome, {{ name }}</span>
+                        <a href="{{ url_for('logout') }}" class="text-red-500 hover:text-red-700 transition-colors">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading Surah...</p>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="hidden fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
+        <div class="text-center px-4">
+            <i class="fas fa-exclamation-triangle text-red-500 text-5xl mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Unable to Load Surah</h3>
+            <p class="text-gray-600 mb-6">Please check your internet connection and try again.</p>
+            <button onclick="location.reload()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors">
+                <i class="fas fa-sync-alt mr-2"></i>Try Again
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Surah Header -->
+        {% if surah %}
+        <div class="surah-header text-white rounded-xl shadow-xl p-8 mb-8">
+            <div class="text-center">
+                <div class="arabic-text text-3xl font-bold mb-4">{{ surah.name }}</div>
+                <h1 class="text-3xl font-bold mb-2">{{ surah.englishName }}</h1>
+                <p class="text-lg opacity-90 mb-4">{{ surah.englishNameTranslation }}</p>
+                <div class="flex justify-center space-x-6 text-sm">
+                    <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                        <i class="fas fa-align-left mr-2"></i>
+                        {{ surah.numberOfAyahs }} Verses
+                    </span>
+                    <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        {{ surah.revelationType.title() if surah.revelationType else 'Unknown' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Ayahs Container -->
+        <div id="ayahsContainer" class="space-y-6">
+            {% if surah.ayahs and english_surah and english_surah.ayahs %}
+            {% for ayah in surah.ayahs %}
+            {% set english_ayah = english_surah.ayahs[loop.index0] if english_surah.ayahs|length > loop.index0 else None %}
+            <div id="ayah-{{ ayah.numberInSurah }}"
+                 class="ayah-container rounded-xl shadow-md p-6 border border-gray-100 {% if ayah.numberInSurah == bookmarked_ayah %}highlighted{% endif %}">
+
+                <!-- Ayah Header -->
+                <div class="flex justify-between items-center mb-4">
+                    <div class="ayah-number text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                        {{ ayah.numberInSurah }}
+                    </div>
+
+                    <!-- Bookmark Button -->
+                    <button data-surah-number="{{ surah.number }}"
+                            data-ayah-number="{{ ayah.numberInSurah }}"
+                            data-surah-name="{{ surah.englishName }}"
+                            class="bookmark-btn {% if ayah.numberInSurah == bookmarked_ayah %}bookmarked{% endif %}
+                                   text-gray-400 hover:text-green-600 transition-colors p-2"
+                            title="Bookmark this ayah">
+                        <i class="fas fa-bookmark text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Arabic Text -->
+                <div class="arabic-text text-gray-800 mb-6 text-xl leading-loose">
+                    {{ ayah.text }}
+                </div>
+
+                <!-- English Translation -->
+                {% if english_ayah %}
+                <div class="text-gray-600 leading-relaxed border-t border-gray-200 pt-4">
+                    <div class="text-sm text-gray-500 mb-2 font-medium">Translation:</div>
+                    <div class="text-lg">{{ english_ayah.text }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-12">
+                <div class="text-6xl mb-4">📖</div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Verses Not Available</h3>
+                <p class="text-gray-500">Unable to load verses from the Quran API. Please try again later.</p>
+                <a href="{{ url_for('quran') }}" class="inline-block mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Quran List
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between items-center mt-12 mb-8">
+            <button onclick="scrollToTop()" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg transition-colors">
+                <i class="fas fa-arrow-up mr-2"></i>Scroll to Top
+            </button>
+            
+            <a href="{{ url_for('quran') }}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors">
+                <i class="fas fa-list mr-2"></i>Back to Quran List
+            </a>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full transition-transform duration-300 z-50">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span id="toastMessage">Bookmark saved!</span>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p class="mb-2">© 2025 AI Hadith Authenticator. All rights reserved.</p>
+            <p class="text-sm text-gray-400 arabic-text" style="font-size: 14px;">المدقق الذكي في الأحاديث النبوية والقرآن الكريم</p>
+        </div>
+    </footer>
+
+    <script>
+        // Hide loading state when page is loaded
+        window.addEventListener('load', function() {
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            
+            loadingState.style.display = 'none';
+            
+            // Check for hash in URL to scroll to specific ayah
+            if (window.location.hash) {
+                setTimeout(() => {
+                    const targetElement = document.querySelector(window.location.hash);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        // Add highlight effect
+                        targetElement.classList.add('highlighted');
+                        setTimeout(() => {
+                            targetElement.classList.remove('highlighted');
+                        }, 2000);
+                    }
+                }, 500);
+            }
+        });
+
+        // Toggle bookmark function
+        async function toggleBookmark(surahNumber, ayahNumber, buttonElement) {
+            try {
+                const surahNameEn = buttonElement.getAttribute('data-surah-name');
+                
+                const response = await fetch('/bookmark', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        surah_number: surahNumber,
+                        ayah_number: ayahNumber,
+                        surah_name_en: surahNameEn
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update button state
+                    const icon = buttonElement.querySelector('i');
+                    
+                    // Remove bookmarked class from all buttons in this surah
+                    document.querySelectorAll('.bookmark-btn').forEach(btn => {
+                        btn.classList.remove('bookmarked');
+                    });
+                    
+                    // Add bookmarked class to clicked button
+                    buttonElement.classList.add('bookmarked');
+                    
+                    // Remove highlight from all ayahs
+                    document.querySelectorAll('.ayah-container').forEach(ayah => {
+                        ayah.classList.remove('highlighted');
+                    });
+                    
+                    // Add highlight to bookmarked ayah
+                    const ayahContainer = document.getElementById(`ayah-${ayahNumber}`);
+                    if (ayahContainer) {
+                        ayahContainer.classList.add('highlighted');
+                    }
+                    
+                    // Show toast notification
+                    showToast('Bookmark saved successfully!');
+                    
+                    console.log('Bookmark saved:', data);
+                } else {
+                    showToast('Failed to save bookmark: ' + data.error, 'error');
+                }
+            } catch (error) {
+                console.error('Bookmark error:', error);
+                showToast('Failed to save bookmark. Please try again.', 'error');
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            
+            if (type === 'error') {
+                toast.className = toast.className.replace('bg-green-600', 'bg-red-600');
+            } else {
+                toast.className = toast.className.replace('bg-red-600', 'bg-green-600');
+            }
+            
+            // Show toast
+            toast.classList.remove('translate-y-full');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('translate-y-full');
+            }, 3000);
+        }
+
+        // Scroll to top function
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // Handle errors gracefully
+        window.addEventListener('error', function(e) {
+            console.error('Page error:', e);
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+
+            if (loadingState) loadingState.style.display = 'none';
+            if (errorState) errorState.classList.remove('hidden');
+        });
+
+        // Add event listeners for bookmark buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const bookmarkButtons = document.querySelectorAll('.bookmark-btn');
+            bookmarkButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const surahNumber = this.getAttribute('data-surah-number');
+                    const ayahNumber = this.getAttribute('data-ayah-number');
+                    toggleBookmark(surahNumber, ayahNumber, this);
+                });
+            });
+        });
+    </script>
+    
+    <!-- Floating AI Assistant -->
+    {% include 'floating_ai_assistant.html' %}
+</body>
+</html>

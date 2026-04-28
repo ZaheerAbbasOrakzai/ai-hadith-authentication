@@ -1,0 +1,150 @@
+# AI Hadith Authenticator - Prometheus Alert Rules
+# Alerting rules for monitoring
+
+groups:
+  - name: ai_hadith_alerts
+    rules:
+      # Application Health
+      - alert: ApplicationDown
+        expr: up{job="ai-hadith-web"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: ai-hadith-authenticator
+        annotations:
+          summary: "AI Hadith Authenticator is down"
+          description: "AI Hadith Authenticator has been down for more than 1 minute."
+
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: rate(flask_http_request_exceptions_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: ai-hadith-authenticator
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }} errors per second."
+
+      # High Response Time
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: ai-hadith-authenticator
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }} seconds."
+
+      # Memory Usage
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }}."
+
+      # CPU Usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%."
+
+      # Disk Usage
+      - alert: HighDiskUsage
+        expr: (node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is {{ $value | humanizePercentage }} on {{ $labels.mountpoint }}."
+
+      # Database Connections
+      - alert: MongoDBHighConnections
+        expr: mongodb_ss_connections{state="current"} > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: mongodb
+        annotations:
+          summary: "High MongoDB connections"
+          description: "MongoDB has {{ $value }} active connections."
+
+      # Database Memory Usage
+      - alert: MongoDBHighMemoryUsage
+        expr: mongodb_memory{type="resident"} / (1024*1024*1024) > 1024
+        for: 5m
+        labels:
+          severity: warning
+          service: mongodb
+        annotations:
+          summary: "High MongoDB memory usage"
+          description: "MongoDB is using {{ $value }}MB of memory."
+
+      # Redis Memory Usage
+      - alert: RedisHighMemoryUsage
+        expr: redis_memory_used_bytes / (1024*1024) > 512
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "High Redis memory usage"
+          description: "Redis is using {{ $value }}MB of memory."
+
+      # SSL Certificate Expiry
+      - alert: SSLCertificateExpiringSoon
+        expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 30
+        for: 1h
+        labels:
+          severity: warning
+          service: ssl
+        annotations:
+          summary: "SSL certificate expiring soon"
+          description: "SSL certificate for {{ $labels.instance }} expires in {{ $value }} days."
+
+  - name: business_metrics
+    rules:
+      # User Registration Rate
+      - alert: LowUserRegistrationRate
+        expr: rate(flask_http_request_total{status="200", handler="/signup"}[1h]) < 0.1
+        for: 2h
+        labels:
+          severity: info
+          service: business
+        annotations:
+          summary: "Low user registration rate"
+          description: "User registration rate is {{ $value }} per hour."
+
+      # Hadith Analysis Rate
+      - alert: LowAnalysisRate
+        expr: rate(flask_http_request_total{status="200", handler="/analyze-hadith"}[1h]) < 0.5
+        for: 2h
+        labels:
+          severity: info
+          service: business
+        annotations:
+          summary: "Low hadith analysis rate"
+          description: "Hadith analysis rate is {{ $value }} per hour."
+
+      # AI Model Performance
+      - alert: LowAIModelAccuracy
+        expr: ai_model_accuracy < 0.8
+        for: 10m
+        labels:
+          severity: warning
+          service: ai-model
+        annotations:
+          summary: "Low AI model accuracy"
+          description: "AI model accuracy is {{ $value | humanizePercentage }}."
